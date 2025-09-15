@@ -9,7 +9,12 @@ This guide will walk you through setting up the backend for **MediGuard software
 - [🚀 Quick Start (Automated Setup)](#-quick-start-automated-setup)
   - [Windows (PowerShell)](#windows-powershell)
   - [Linux/macOS (Bash)](#linuxmacos-bash)
-- [📋 Prerequisites](#-prerequisites)
+- [� Using Development Environment Scripts](#-using-development-environment-scripts)
+  - [Windows Environment Script](#windows-environment-script)
+  - [Linux/macOS Environment Script](#linuxmacos-environment-script)
+  - [Available Commands](#available-commands)
+  - [Script Options](#script-options)
+- [�📋 Prerequisites](#-prerequisites)
 - [📖 Manual Setup](#-manual-setup)
   - [Step 1: Check if Python and UV are installed](#step-1-check-if-python-and-uv-are-installed)
   - [Step 2: Install Missing Dependencies](#step-2-install-missing-dependencies)
@@ -27,7 +32,6 @@ To get started, you need to clone the MediGuard backend repository from GitHub. 
 ```bash
 git clone https://github.com/utsav-56/mediguard_backend.git
 ```
-
 
 After cloning, navigate into the project directory:
 
@@ -81,7 +85,158 @@ The automated scripts will:
 
 ---
 
-## 📋 Prerequisites
+## � Using Development Environment Scripts
+
+After the initial setup, we provide convenient environment scripts that automatically activate your virtual environment and set up useful command shortcuts. These scripts make development much easier!
+
+### Windows Environment Script
+
+**For Windows users**, use the PowerShell environment script:
+
+```powershell
+# Navigate to your project directory
+cd path\to\mediguard_backend
+
+# Run the environment script
+.\venvshell.ps1
+```
+
+**What this script does:**
+- ✅ Automatically activates the Python virtual environment
+- ✅ Sets up convenient command shortcuts (aliases)
+- ✅ Creates the virtual environment if it doesn't exist
+- ✅ Provides colored output for better readability
+
+### Linux/macOS Environment Script
+
+**For Linux/macOS users**, use the bash environment script:
+
+```bash
+# Navigate to your project directory
+cd path/to/mediguard_backend
+
+# Make the script executable (only needed once)
+chmod +x venvshell
+
+# Source the script (important: use source or .)
+source ./venvshell
+# OR
+. ./venvshell
+```
+
+**⚠️ Important for Linux/macOS:** Always use `source` or `.` before the script name. This ensures the virtual environment and aliases remain active in your current shell session.
+
+### Available Commands
+
+After running the environment script, you'll have access to these convenient shortcuts:
+
+| Command | What it does | Example |
+|---------|--------------|---------|
+| `py <command>` | Run Python commands via UV | `py --version` |
+| `dj <command>` | Run Django management commands | `dj runserver` |
+| `createsu` | Create a Django superuser | `createsu` |
+| `makemig` | Make migrations and apply them | `makemig` |
+
+**Common Django commands made easy:**
+
+```bash
+# Start the development server
+dj runserver
+
+# Start server on a different port
+dj runserver 8080
+
+# Run database migrations
+dj migrate
+
+# Create new migrations
+dj makemigrations
+
+# Create and apply migrations in one go
+makemig
+
+# Create a new Django app
+dj startapp myapp
+
+# Open Django shell
+dj shell
+
+# Run tests
+dj test
+
+# Create a superuser account
+createsu
+
+# Collect static files
+dj collectstatic
+
+# Check for any issues
+dj check
+```
+
+### Script Options
+
+Both scripts support several options for different use cases:
+
+#### Windows (PowerShell)
+```powershell
+# Show help
+.\venvshell.ps1 -Help
+
+# Only set up aliases (skip virtual environment activation)
+.\venvshell.ps1 -AliasOnly
+
+# Skip alias creation (only activate virtual environment)
+.\venvshell.ps1 -NoAlias
+
+# Enable verbose output for debugging
+.\venvshell.ps1 -Verbose
+```
+
+#### Linux/macOS (Bash)
+```bash
+# Show help
+source ./venvshell --help
+
+# Only set up aliases (skip virtual environment activation)
+source ./venvshell --alias-only
+
+# Skip alias creation (only activate virtual environment)
+source ./venvshell --no-alias
+
+# Enable verbose output for debugging
+source ./venvshell --verbose
+```
+
+**💡 Pro Tips:**
+
+1. **Daily Development Workflow:**
+   ```bash
+   # Open terminal, navigate to project
+   cd path/to/mediguard_backend
+   
+   # Source the environment script
+   source ./venvshell    # Linux/macOS
+   # OR
+   .\venvshell.ps1       # Windows
+   
+   # Start coding with shortcuts!
+   dj runserver
+   ```
+
+2. **Quick Commands:**
+   - Use `dj runserver` instead of `uv run manage.py runserver`
+   - Use `makemig` instead of running makemigrations + migrate separately
+   - Use `py` for any Python commands that need the virtual environment
+
+3. **Troubleshooting:**
+   - If commands don't work, make sure you sourced the script (Linux/macOS)
+   - Use `--verbose` flag to see what the script is doing
+   - Check that your virtual environment exists with `ls .venv`
+
+---
+
+## �📋 Prerequisites
 
 You will need the following installed on your system:
 
@@ -704,8 +859,15 @@ Starting development server at http://127.0.0.1:8000/
     ```
 </details>
 
+**❌ Environment script commands not working (Linux/macOS)**
+- **Solution:** Make sure you used `source ./venvshell` instead of `./venvshell`
+- **Alternative:** Try `. ./venvshell` (note the dot and space before the script name)
 
-
+**❌ Environment script not found**
+- **Solution:** Make sure you're in the correct directory and the file exists:
+  ```bash
+  ls -la venvshell*
+  ```
 
 **❌ Permission denied (Linux/macOS)**
 - **Solution:** Use `sudo` for system-wide installations or check file permissions.
