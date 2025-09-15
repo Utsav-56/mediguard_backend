@@ -1,0 +1,258 @@
+#!/usr/bin/env bash
+# filepath: d:\4th sem project\Medi_guard\mediguard_backend\venvshell
+
+# Script configuration
+HELP=false
+NO_ALIAS=false
+ALIAS_ONLY=false
+VERBOSE=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            HELP=true
+            shift
+            ;;
+        --no-alias)
+            NO_ALIAS=true
+            shift
+            ;;
+        --alias-only)
+            ALIAS_ONLY=true
+            shift
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Help function
+show_help() {
+    cat << EOF
+Usage: ./venvshell [-h|--help] [--no-alias] [--alias-only] [-v|--verbose]
+
+Options:
+  -h, --help       Show this help message
+  --no-alias       Skip alias creation
+  --alias-only     Only create aliases, skip venv activation
+  -v, --verbose    Enable verbose output
+
+This script activates the MediGuard backend virtual environment and sets up useful aliases.
+
+Available aliases after activation:
+  py <command>           - Run Python command via uv
+  dj <command> [args]    - Run Django management commands
+  createsu               - Create Django superuser
+  makemig                - Make migrations and migrate
+
+Django command examples:
+  dj runserver           - Start development server
+  dj migrate             - Run migrations
+  dj makemigrations      - Create new migrations
+  dj startapp myapp      - Create new Django app
+  dj test                - Run tests
+  dj collectstatic       - Collect static files
+  dj shell               - Open Django shell
+
+Note: To use this script properly, source it instead of executing:
+  source ./venvshell [options]
+  # or
+  . ./venvshell [options]
+
+EOF
+}
+
+# Check for help option
+if [[ "$HELP" == true ]]; then
+    show_help
+    return 0 2>/dev/null || exit 0
+fi
+
+# Color output functions
+write_color_output() {
+    local message="$1"
+    local color="$2"
+    
+    case "$color" in
+        "cyan")    echo -e "\033[36m$message\033[0m" ;;
+        "green")   echo -e "\033[32m$message\033[0m" ;;
+        "yellow")  echo -e "\033[33m$message\033[0m" ;;
+        "red")     echo -e "\033[31m$message\033[0m" ;;
+        "gray")    echo -e "\033[90m$message\033[0m" ;;
+        *)         echo "$message" ;;
+    esac
+}
+
+write_info() { write_color_output "[INFO] $1" "cyan"; }
+write_success() { write_color_output "[SUCCESS] $1" "green"; }
+write_warning() { write_color_output "[WARNING] $1" "yellow"; }
+write_error() { write_color_output "[ERROR] $1" "red"; }
+write_verbose() { [[ "$VERBOSE" == true ]] && write_color_output "[VERBOSE] $1" "gray"; }
+
+write_break() {
+    local count=${1:-1}
+    for ((i=1; i<=count; i++)); do
+        echo
+    done
+}
+
+# Django management function
+_dj() {
+    if [[ $# -eq 0 ]]; then
+        write_error "Django command required"
+        return 1
+    fi
+    
+    local command="$1"
+    shift
+    local full_command="uv run manage.py $command $*"
+    
+    write_verbose "Executing: $full_command"
+    
+    if ! eval "$full_command"; then
+        write_error "Failed to execute Django command"
+        return 1
+    fi
+    return 0
+}
+
+# Special function for makemigrations + migrate workflow
+_makemig() {
+    write_info "Running makemigrations..."
+    if _dj "makemigrations" "$@"; then
+        write_info "Running migrate..."
+        _dj "migrate"
+    else
+        write_error "Makemigrations failed, skipping migrate"
+        return 1
+    fi
+}
+
+# Function for creating superuser
+_createsu() {
+    _dj "createsuperuser"
+}
+
+# Function to set up all aliases
+set_project_aliases() {
+    write_verbose "Setting up project aliases..."
+    
+    # Core aliases
+    alias py='uv run'
+    alias dj='_dj'
+    
+    # Convenience aliases
+    alias createsu='_createsu'
+    alias makemig='_makemig'
+    
+    write_success "Aliases created successfully!"
+    write_info "Available commands: py, dj, createsu, makemig"
+}
+
+# Function to activate virtual environment
+start_virtual_environment() {
+    local cwd=$(pwd)
+    write_info "Current working directory: $cwd"
+    
+    # Check if virtual environment exists
+    local venv_path="$cwd/.venv"
+    if [[ ! -d "$venv_path" ]]; then
+        write_warning "Virtual environment not found. Creating one..."
+        write_info "Running 'uv venv' to create virtual environment..."
+        
+        if ! uv venv; then
+            write_error "Failed to create virtual environment"
+            write_error "Please ensure UV is properly installed and accessible."
+            return 1
+        fi
+        
+        if [[ ! -d "$venv_path" ]]; then
+            write_error "Virtual environment directory was not created"
+            return 1
+        fi
+        
+        write_success "Virtual environment created successfully!"
+        write_break
+    else
+        write_verbose "Virtual environment found at: $venv_path"
+    fi
+    
+    # Activate virtual environment
+    local activate_script="$venv_path/bin/activate"
+    if [[ ! -f "$activate_script" ]]; then
+        write_error "Activation script not found at: $activate_script"
+        write_error "The virtual environment may be corrupted. Try deleting .venv folder and run again."
+        return 1
+    fi
+    
+    write_info "Activating virtual environment..."
+    
+    # Source the activation script
+    if ! source "$activate_script"; then
+        write_error "Failed to activate virtual environment"
+        write_warning "Try running manually: source $activate_script"
+        return 1
+    fi
+    
+    # Verify activation
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        write_error "VIRTUAL_ENV environment variable not set after activation"
+        return 1
+    fi
+    
+    write_success "Virtual environment activated successfully!"
+    write_info "Virtual environment path: $VIRTUAL_ENV"
+    
+    # Show Python path
+    local python_path=$(which python 2>/dev/null)
+    if [[ -n "$python_path" ]]; then
+        write_verbose "Using Python from: $python_path"
+    fi
+    
+    return 0
+}
+
+# ================ Main Script Execution ==================
+
+write_color_output "================= MediGuard Backend Environment ================" "magenta"
+write_break
+
+# Handle alias-only mode
+if [[ "$ALIAS_ONLY" == true ]]; then
+    write_info "Running in alias-only mode..."
+    set_project_aliases
+    write_break
+    write_success "Aliases set up successfully! Virtual environment activation skipped."
+    return 0 2>/dev/null || exit 0
+fi
+
+# Activate virtual environment
+if start_virtual_environment; then
+    write_break
+    write_success "Environment is ready!"
+    
+    # Set up aliases unless disabled
+    if [[ "$NO_ALIAS" != true ]]; then
+        set_project_aliases
+        write_break
+        write_info "Quick start examples:"
+        echo "  dj runserver           # Start development server"
+        echo "  dj migrate             # Run database migrations"
+        echo "  makemig                # Create and apply migrations"
+        echo "  createsu               # Create superuser"
+        echo "  py --version           # Check Python version"
+    fi
+else
+    write_error "Failed to set up environment. Please check the errors above."
+    return 1 2>/dev/null || exit 1
+fi
+
+write_break
+write_color_output "Happy coding! 🚀" "green"
