@@ -914,7 +914,7 @@ Starting development server at http://127.0.0.1:8000/
 `bash
     source .venv/bin/activate
     `
- </details>
+  </details>
 
 **❌ Environment script commands not working (Linux/macOS)**
 

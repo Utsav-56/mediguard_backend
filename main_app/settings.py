@@ -7,7 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "insecure-dev-secret")
+GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-your-default-secret-key-here-change-in-production")
+
+
 DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
@@ -29,6 +33,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'accounts',
+    'image_processer',
 ]
 
 AUTH_USER_MODEL = "accounts.User"

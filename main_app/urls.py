@@ -25,8 +25,7 @@ urlpatterns = [
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
 
-    # dj-rest-auth (social + session login/logout)
-    path("auth/", include("dj_rest_auth.urls")),
-    path("auth/registration/", include("dj_rest_auth.registration.urls")),
-    path("auth/social/", include("allauth.socialaccount.urls")),
+    # Local apps
+    # path('accounts/', include('accounts.urls')),
+    path('upload/', include('image_processer.urls')),
 ]
