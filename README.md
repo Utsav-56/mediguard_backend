@@ -7,19 +7,19 @@ This guide will walk you through setting up the backend for **MediGuard software
 ## 📑 Table of Contents
 
 - [🚀 Quick Start (Automated Setup)](#-quick-start-automated-setup)
-  - [Windows (PowerShell)](#windows-powershell)
-  - [Linux/macOS (Bash)](#linuxmacos-bash)
+    - [Windows (PowerShell)](#windows-powershell)
+    - [Linux/macOS (Bash)](#linuxmacos-bash)
 - [� Using Development Environment Scripts](#-using-development-environment-scripts)
-  - [Windows Environment Script](#windows-environment-script)
-  - [Linux/macOS Environment Script](#linuxmacos-environment-script)
-  - [Available Commands](#available-commands)
-  - [Script Options](#script-options)
+    - [Windows Environment Script](#windows-environment-script)
+    - [Linux/macOS Environment Script](#linuxmacos-environment-script)
+    - [Available Commands](#available-commands)
+    - [Script Options](#script-options)
 - [�📋 Prerequisites](#-prerequisites)
 - [📖 Manual Setup](#-manual-setup)
-  - [Step 1: Check if Python and UV are installed](#step-1-check-if-python-and-uv-are-installed)
-  - [Step 2: Install Missing Dependencies](#step-2-install-missing-dependencies)
-  - [Step 3: Setup MediGuard Backend](#step-3-setup-mediguard-backend)
-  - [Step 4: Run the Django Server](#step-4-run-the-django-server)
+    - [Step 1: Check if Python and UV are installed](#step-1-check-if-python-and-uv-are-installed)
+    - [Step 2: Install Missing Dependencies](#step-2-install-missing-dependencies)
+    - [Step 3: Setup MediGuard Backend](#step-3-setup-mediguard-backend)
+    - [Step 4: Run the Django Server](#step-4-run-the-django-server)
 - [✅ Success!](#-success)
 - [⚠️ Troubleshooting](#️-troubleshooting)
 
@@ -53,28 +53,29 @@ So feel free to choose any of them.`
 
 1. Open **PowerShell** as Administrator
 2. Navigate to the project directory:
-   ```powershell
-   cd path\to\mediguard_backend
-   ```
+    ```powershell
+    cd path\to\mediguard_backend
+    ```
 3. Run the automated setup script:
-   ```powershell
-   .\setup.ps1
-   ```
+    ```powershell
+    .\setup.ps1
+    ```
 
 ### Linux/macOS (Bash)
 
 1. Open **Terminal**
 2. Navigate to the project directory:
-   ```bash
-   cd path/to/mediguard_backend
-   ```
+    ```bash
+    cd path/to/mediguard_backend
+    ```
 3. Make the script executable and run it:
-   ```bash
-   chmod +x setup
-   ./setup
-   ```
+    ```bash
+    chmod +x setup
+    ./setup
+    ```
 
 The automated scripts will:
+
 - ✅ Check if Python is installed (install if missing)
 - ✅ Check if UV is installed (install if missing)
 - ✅ Set up the virtual environment
@@ -102,6 +103,7 @@ cd path\to\mediguard_backend
 ```
 
 **What this script does:**
+
 - ✅ Automatically activates the Python virtual environment
 - ✅ Sets up convenient command shortcuts (aliases)
 - ✅ Creates the virtual environment if it doesn't exist
@@ -130,12 +132,12 @@ source ./venvshell
 
 After running the environment script, you'll have access to these convenient shortcuts:
 
-| Command | What it does | Example |
-|---------|--------------|---------|
-| `py <command>` | Run Python commands via UV | `py --version` |
+| Command        | What it does                   | Example        |
+| -------------- | ------------------------------ | -------------- |
+| `py <command>` | Run Python commands via UV     | `py --version` |
 | `dj <command>` | Run Django management commands | `dj runserver` |
-| `createsu` | Create a Django superuser | `createsu` |
-| `makemig` | Make migrations and apply them | `makemig` |
+| `createsu`     | Create a Django superuser      | `createsu`     |
+| `makemig`      | Make migrations and apply them | `makemig`      |
 
 **Common Django commands made easy:**
 
@@ -179,6 +181,7 @@ dj check
 Both scripts support several options for different use cases:
 
 #### Windows (PowerShell)
+
 ```powershell
 # Show help
 .\venvshell.ps1 -Help
@@ -194,6 +197,7 @@ Both scripts support several options for different use cases:
 ```
 
 #### Linux/macOS (Bash)
+
 ```bash
 # Show help
 source ./venvshell --help
@@ -211,28 +215,29 @@ source ./venvshell --verbose
 **💡 Pro Tips:**
 
 1. **Daily Development Workflow:**
-   ```bash
-   # Open terminal, navigate to project
-   cd path/to/mediguard_backend
-   
-   # Source the environment script
-   source ./venvshell    # Linux/macOS
-   # OR
-   .\venvshell.ps1       # Windows
-   
-   # Start coding with shortcuts!
-   dj runserver
-   ```
+
+    ```bash
+    # Open terminal, navigate to project
+    cd path/to/mediguard_backend
+
+    # Source the environment script
+    source ./venvshell    # Linux/macOS
+    # OR
+    .\venvshell.ps1       # Windows
+
+    # Start coding with shortcuts!
+    dj runserver
+    ```
 
 2. **Quick Commands:**
-   - Use `dj runserver` instead of `uv run manage.py runserver`
-   - Use `makemig` instead of running makemigrations + migrate separately
-   - Use `py` for any Python commands that need the virtual environment
+    - Use `dj runserver` instead of `uv run manage.py runserver`
+    - Use `makemig` instead of running makemigrations + migrate separately
+    - Use `py` for any Python commands that need the virtual environment
 
 3. **Troubleshooting:**
-   - If commands don't work, make sure you sourced the script (Linux/macOS)
-   - Use `--verbose` flag to see what the script is doing
-   - Check that your virtual environment exists with `ls .venv`
+    - If commands don't work, make sure you sourced the script (Linux/macOS)
+    - Use `--verbose` flag to see what the script is doing
+    - Check that your virtual environment exists with `ls .venv`
 
 ---
 
@@ -252,32 +257,38 @@ The backend is built in **Python**, and **UV** is used instead of pip for depend
 ### Step 1: Check if Python and UV are installed
 
 #### 🪟 Windows
+
 1. Open **PowerShell** or **CMD**
 2. Check Python:
-   ```powershell
-   python --version
-   ```
-   **✔️ Expected output:** `Python 3.12.x` (or similar)
+
+    ```powershell
+    python --version
+    ```
+
+    **✔️ Expected output:** `Python 3.12.x` (or similar)
 
 3. Check UV:
-   ```powershell
-   uv --version
-   ```
-   **✔️ Expected output:** Version number
+    ```powershell
+    uv --version
+    ```
+    **✔️ Expected output:** Version number
 
 #### 🐧 Linux / 🍏 macOS
+
 1. Open **Terminal**
 2. Check Python:
-   ```bash
-   python3 --version
-   ```
-   **✔️ Expected output:** `Python 3.x.x`
+
+    ```bash
+    python3 --version
+    ```
+
+    **✔️ Expected output:** `Python 3.x.x`
 
 3. Check UV:
-   ```bash
-   uv --version
-   ```
-   **✔️ Expected output:** Version number
+    ```bash
+    uv --version
+    ```
+    **✔️ Expected output:** Version number
 
 **❌ If either command gives an error (`command not found`), follow the installation steps below.**
 
@@ -288,11 +299,13 @@ The backend is built in **Python**, and **UV** is used instead of pip for depend
 #### 🪟 Windows (using Winget)
 
 **Install Python:**
+
 ```powershell
 winget install Python.Python.3.12
 ```
 
 **Install UV:**
+
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
@@ -300,10 +313,12 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 #### 🍏 macOS
 
 **1. Install Homebrew (if not installed):**
+
 <details>
 <summary><strong>Check if Homebrew is installed</strong></summary>
 
 Check if Homebrew is already installed run the following command:
+
 ```bash
 brew --version
 ```
@@ -313,32 +328,38 @@ brew --version
 **❌ If you get `brew: command not found`, Homebrew is not installed.**
 
 **❌ If you get `command not found`, follow the installation steps below.**
+
 </details>
 
 <details>
 <summary><strong>Install Homebrew</strong></summary>
 
 To install Homebrew, run the following command in your terminal:
+
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 After installation, add it to your shell profile:
+
 ```bash
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
+
 </details>
 
 <br>
 
 **2. Install Python and UV:**
+
 ```bash
 brew install python
 brew install uv
 ```
 
 #### 🐧 Linux
+
 For different linux distributions, use the appropriate package manager to install Python and pip, then install UV using the provided script.
 
 Some popular distributions are covered below:
@@ -367,6 +388,7 @@ Puppy Linux, TinyCore, AntiX, SliTaz, Porteus, Slax
 
 **Others:**
 Deepin, KDE neon, Proxmox VE, Turnkey Linux, Nitrux, Voyager Live
+
 </details>
 
 ```bash
@@ -374,6 +396,7 @@ sudo apt update
 sudo apt install python3 python3-venv python3-pip -y
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -403,12 +426,14 @@ Fedora CoreOS, Red Hat CoreOS, CentOS Cloud, Amazon Linux, Photon OS
 
 **Others:**
 OpenMandriva, PCLinuxOS, Mageia, ROSA Linux, Unity Linux, Berry Linux
+
 </details>
 
 ```bash
 sudo dnf install python3 python3-venv python3-pip -y
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -441,12 +466,14 @@ RebornOS, Crystal Linux, XeroLinux, ArchEX, Bluestar Linux, Chakra Linux
 
 **Others:**
 Antergos (discontinued), Bridge Linux, CTKArch, LinHES, Archphile
+
 </details>
 
 ```bash
 sudo pacman -Syu python python-virtualenv python-pip
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -476,12 +503,14 @@ openSUSE Tumbleweed (rolling), openSUSE Leap (stable), openSUSE MicroOS (immutab
 
 **Others:**
 SUSE Studio Express, openSUSE Education, openSUSE Medical, SUSE Linux Enterprise Real Time
+
 </details>
 
 ```bash
 sudo zypper install python3 python3-venv python3-pip
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -511,6 +540,7 @@ Nix on macOS, Nix on Ubuntu, Nix on other Linux distributions
 
 **Others:**
 NixOS Live, NixOS ISO, Home Manager, Nix Darwin, NixOps
+
 </details>
 
 ```bash
@@ -519,12 +549,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 Or add to your `configuration.nix`:
+
 ```nix
 environment.systemPackages = with pkgs; [
     python3
     python3Packages.pip
 ];
 ```
+
 </details>
 
 <details>
@@ -557,6 +589,7 @@ Adélie Linux (Alpine-based), Chimera Linux (partially Alpine-inspired)
 
 **Others:**
 Alpine Linux Live, Alpine Linux Netboot, Alpine Linux Diskless, Alpine Linux Encrypted
+
 </details>
 
 ```bash
@@ -564,6 +597,7 @@ sudo apk update
 sudo apk add python3 python3-dev py3-pip py3-virtualenv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -593,12 +627,14 @@ CentOS Docker images, CentOS Cloud images, CentOS Vagrant boxes
 
 **Others:**
 ClearOS, SME Server, NethServer, Elastix (EOL), PBX in a Flash
+
 </details>
 
 ```bash
 sudo yum install python3 python3-venv python3-pip -y
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -628,12 +664,14 @@ Gentoo Hardened, Pentoo Linux, Hardened Gentoo with Grsecurity
 
 **Others:**
 Chromium OS (Gentoo-based), Container Linux (CoreOS, Gentoo-based), Exherbo Linux
+
 </details>
 
 ```bash
 sudo emerge dev-lang/python
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -660,12 +698,14 @@ Void Linux x86_64, Void Linux i686, Void Linux ARM, Void Linux AArch64
 
 **Others:**
 Void Linux containers, Void Linux for servers, Void Linux runit-based
+
 </details>
 
 ```bash
 sudo xbps-install -S python3 python3-pip
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -695,6 +735,7 @@ Plamo Linux (Japanese), Kondara MNU/Linux (Japanese, discontinued)
 
 **Others:**
 Slax (live distro), Porteus, Puppy Linux (some variants), Kate OS
+
 </details>
 
 ```bash
@@ -702,6 +743,7 @@ Slax (live distro), Porteus, Puppy Linux (some variants), Kate OS
 # For package management, use slackpkg or sbopkg
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -728,12 +770,14 @@ Clear Linux x86_64 (Intel optimized), Clear Linux for Intel hardware
 
 **Others:**
 Clear Linux live, Clear Linux installer, Clear Linux cloud images
+
 </details>
 
 ```bash
 sudo swupd bundle-add python3-basic dev-utils
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
@@ -760,21 +804,25 @@ Solus community packages, Solus third-party software
 
 **Others:**
 Solus live ISO, Solus virtual machine images, Solus development builds
+
 </details>
 
 ```bash
 sudo eopkg install python3 python3-devel pip
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 <details>
 <summary><strong>Other Distros</strong></summary>
 
 Refer to your distribution's documentation for installing Python 3 and pip, then run:
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
 </details>
 
 ---
@@ -782,26 +830,30 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Step 3: Setup MediGuard Backend
 
 1. **Navigate to the project directory:**
-   ```bash
-   cd path/to/mediguard_backend
-   ```
+
+    ```bash
+    cd path/to/mediguard_backend
+    ```
 
 2. **Sync dependencies with UV:**
-   ```bash
-   uv sync
-   ```
+
+    ```bash
+    uv sync
+    ```
 
 3. **Activate the virtual environment:**
 
-   **Windows (PowerShell):**
-   ```powershell
-   .\.venv\Scripts\Activate.ps1
-   ```
+    **Windows (PowerShell):**
 
-   **Linux / macOS:**
-   ```bash
-   source .venv/bin/activate
-   ```
+    ```powershell
+    .\.venv\Scripts\Activate.ps1
+    ```
+
+    **Linux / macOS:**
+
+    ```bash
+    source .venv/bin/activate
+    ```
 
 ---
 
@@ -814,6 +866,7 @@ uv run manage.py runserver
 ```
 
 **✅ Expected output:**
+
 ```
 Django version X.X, using settings 'main_app.settings'
 Starting development server at http://127.0.0.1:8000/
@@ -834,18 +887,22 @@ Starting development server at http://127.0.0.1:8000/
 ### Common Issues & Solutions
 
 **❌ `python not recognized` (Windows)**
+
 - **Solution:** Try `py --version` instead. If it works, use `py` instead of `python`.
 
 **❌ `uv not recognized`**
+
 - **Solution:** Restart your terminal after installing UV, or add it to PATH manually.
 
 **❌ `Port already in use` (when running server)**
+
 - **Solution:** Stop the process using port 8000 or run Django on a different port:
-  ```bash
-  uv run manage.py runserver 5969
-  ```
+    ```bash
+    uv run manage.py runserver 5969
+    ```
 
 **❌ Virtual environment not activating**
+
 <details>
 <summary>See full solution</summary>
 
@@ -854,20 +911,23 @@ Starting development server at http://127.0.0.1:8000/
     uv venv
     ```
 2. Then activate the virtual environment again:
-    ```bash
+`bash
     source .venv/bin/activate
-    ```
-</details>
+    `
+ </details>
 
 **❌ Environment script commands not working (Linux/macOS)**
+
 - **Solution:** Make sure you used `source ./venvshell` instead of `./venvshell`
 - **Alternative:** Try `. ./venvshell` (note the dot and space before the script name)
 
 **❌ Environment script not found**
+
 - **Solution:** Make sure you're in the correct directory and the file exists:
-  ```bash
-  ls -la venvshell*
-  ```
+    ```bash
+    ls -la venvshell*
+    ```
 
 **❌ Permission denied (Linux/macOS)**
+
 - **Solution:** Use `sudo` for system-wide installations or check file permissions.

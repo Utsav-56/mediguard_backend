@@ -10,3 +10,8 @@ wheels/
 .venv
 activate.ps1
 activate
+env/
+venv/
+test/
+.env
+frontend_guide.*
