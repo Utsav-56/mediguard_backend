@@ -12,8 +12,29 @@ GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-your-default-secret-key-here-change-in-production")
 
 
-DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
+# Make sure these are properly configured
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']  # Add '*' for development only
+
+# Check if CORS is causing issues (if you have django-cors-headers installed)
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+]
+
+DEBUG = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -34,6 +55,7 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'image_processer',
+    'ping',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -42,7 +64,14 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_RENDERER_CLASSES": (
+        "rest_framework.renderers.JSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+    ),
 }
+
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -55,7 +84,7 @@ SIMPLE_JWT = {
 DJOSER = {
     "USER_ID_FIELD": "id",
     "LOGIN_FIELD": "email",
-    "USER_CREATE_PASSWORD_RETYPE": True,
+    "USER_CREATE_PASSWORD_RETYPE": False,
     "SEND_ACTIVATION_EMAIL": False,  # Set to True if email backend is configured
     "SEND_CONFIRMATION_EMAIL": False,
     "SERIALIZERS": {

@@ -28,4 +28,6 @@ urlpatterns = [
     # Local apps
     # path('accounts/', include('accounts.urls')),
     path('upload/', include('image_processer.urls')),
+
+    path('ping/', include('ping.urls')),
 ]

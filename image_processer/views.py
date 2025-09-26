@@ -51,7 +51,6 @@ def identify_medicine_from_image(image):
         return None
 
     try:
-        # Use the correct Gemini API method
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content([PROMPT, image])
         return parse_md_json(response.text)
@@ -59,7 +58,7 @@ def identify_medicine_from_image(image):
         print(f"Error calling Gemini API: {e}")
         return None
 
-
+        
 # // returns response and a boolean indicating success or failure
 def validate_uploaded_file(request):
     """Validate the uploaded file in the request."""
@@ -92,6 +91,7 @@ def validate_uploaded_file(request):
     except Exception as e:
         return JsonResponse({
             'error': f'An error occurred while processing the image: {str(e)}',
+            'log': f"Error processing image: {str(e)}",
             'success': False
         }, status=500), False
 
@@ -130,6 +130,12 @@ def upload_and_process_image(request):
         else:
             return JsonResponse({
                 'error': 'Failed to identify medicine from the image',
+                'log': f"""result is None or empty 
+                \n result: {result} \n Potential cause can be: 
+                1. No response from Gemini API
+                2. Gemini API Trial limit exceeded
+                
+                """,
                 'success': False
             }, status=500)
             
