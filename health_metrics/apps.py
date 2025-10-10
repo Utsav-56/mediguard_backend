@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AlarmsConfig(AppConfig):
+class HealthMetricsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "alarms"
+    name = "health_metrics"

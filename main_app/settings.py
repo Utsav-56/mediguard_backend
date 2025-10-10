@@ -56,10 +56,13 @@ INSTALLED_APPS = [
     "djoser",
     "rest_framework_simplejwt",
     "django_extensions",
+    "django_filters",
     # Local apps
     "accounts",
+    "medicines",
+    "health_metrics",
     "image_processer",
-    "ping",
+   
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -155,3 +158,19 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Celery Beat Schedule for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'process-due-reminders': {
+        'task': 'medicines.tasks.process_due_reminders',
+        'schedule': 60.0,  # Run every minute
+    },
+}

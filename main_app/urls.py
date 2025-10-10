@@ -24,12 +24,14 @@ urlpatterns = [
     # Admin urls
     path("admin/", admin.site.urls),
     # Djoser (JWT auth)
-    path("auth/", include("djoser.urls")),
-    path("auth/", include("djoser.urls.jwt")),
+    path("api/auth/", include("djoser.urls")),
+    path("api/auth/", include("djoser.urls.jwt")),
     # Local apps
-    # path('accounts/', include('accounts.urls')),
-    path("upload/", include("image_processer.urls")),
-    path("ping/", include("ping.urls")),
+    path('api/accounts/', include('accounts.urls')),
+    path('api/', include('medicines.urls')),
+    path('api/', include('health_metrics.urls')),
+    path("scan/", include("image_processer.urls")),
+   
 ]
 
 

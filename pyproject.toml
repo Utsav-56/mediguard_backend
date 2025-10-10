@@ -6,9 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "black>=25.9.0",
+    "celery>=5.5.3",
     "dj-rest-auth[with-social]>=7.0.1",
     "django>=5.2.6",
     "django-extensions>=4.1",
+    "django-filter>=25.2",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
     "djoser>=2.3.3",
@@ -16,5 +18,8 @@ dependencies = [
     "google-generativeai>=0.8.5",
     "pillow>=11.3.0",
     "psycopg2-binary>=2.9.10",
+    "python-dateutil>=2.9.0.post0",
     "python-dotenv>=1.1.1",
+    "pytz>=2025.2",
+    "redis>=6.4.0",
 ]

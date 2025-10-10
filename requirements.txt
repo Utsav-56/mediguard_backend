@@ -1,0 +1,33 @@
+# Core Django packages
+Django>=5.2.6
+djangorestframework>=3.16.1
+django-extensions>=4.1
+
+# Authentication and JWT
+djoser>=2.3.3
+djangorestframework-simplejwt>=5.5.1
+
+# Database and ORM
+psycopg2-binary>=2.9.10
+
+# Celery and Redis for background tasks
+celery>=5.5.3
+redis>=6.4.0
+
+# Date and timezone handling
+python-dateutil>=2.9.0
+pytz>=2025.2
+
+# Image processing
+Pillow>=11.3.0
+
+# Filtering and search
+django-filter>=25.2
+
+# Development and environment
+python-dotenv>=1.1.1
+black>=25.9.0
+
+# Optional AI integration (for future features)
+google-genai>=1.38.0
+google-generativeai>=0.8.5
