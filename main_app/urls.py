@@ -23,13 +23,15 @@ from django.urls import path, include
 urlpatterns = [
     # Admin urls
     path("admin/", admin.site.urls),
+    
     # Djoser (JWT auth)
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
+    
     # Local apps
-    # path('accounts/', include('accounts.urls')),
     path("upload/", include("image_processer.urls")),
     path("ping/", include("ping.urls")),
+    path("medicines/", include("medicines.urls")),
 ]
 
 

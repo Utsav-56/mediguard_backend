@@ -44,22 +44,27 @@ LOGGING = {
 
 # Application definition
 INSTALLED_APPS = [
+    
+    # Default Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
     # Third-party apps
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
     "rest_framework_simplejwt",
     "django_extensions",
+    
     # Local apps
     "accounts",
     "image_processer",
     "ping",
+    "medicines",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
