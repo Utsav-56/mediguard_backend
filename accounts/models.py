@@ -3,7 +3,9 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     BaseUserManager,
 )
+from django.core.validators import RegexValidator
 from django.db import models
+from django.conf import settings
 
 
 def user_profile_image_path(instance, filename):
@@ -31,7 +33,28 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    phone_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        validators=[
+            # 1. Check length min of 7 and max of 13 digits (excluding +)
+            RegexValidator(
+                regex=r"^\+?\d{7,13}$",
+                message="Phone number must be between 7-13 digits",
+            ),
+            # 2. Check if it contains anything other than + and digits
+            RegexValidator(
+                regex=r"^[+\d]+$",
+                message="Phone number can only contain digits or a plus sign.",
+            ),
+           
+            RegexValidator(
+                regex=r"^\+?\d+$",
+                message="Phone number must not contain consecutive special characters.",
+            ),
+        ],
+    )
     address = models.TextField(blank=True, null=True)
 
     profile_image = models.ImageField(
@@ -63,4 +86,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.full_name
 
     def get_short_name(self):
-        return self.full_name.split(" ")[0]
+        return self.full_name.split(" ")
+
+    def get_profile_image_url(self):
+        if self.profile_image:
+            request = getattr(self, '_request', None)
+            if request:
+                return request.build_absolute_uri(self.profile_image.url)
+            else:
+                # Fallback to manual construction
+                return f"{settings.MEDIA_URL}{self.profile_image.name}"
+        return None
