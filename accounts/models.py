@@ -48,7 +48,6 @@ class User(AbstractBaseUser, PermissionsMixin):
                 regex=r"^[+\d]+$",
                 message="Phone number can only contain digits or a plus sign.",
             ),
-           
             RegexValidator(
                 regex=r"^\+?\d+$",
                 message="Phone number must not contain consecutive special characters.",
@@ -90,10 +89,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_profile_image_url(self):
         if self.profile_image:
-            request = getattr(self, '_request', None)
+            request = getattr(self, "_request", None)
             if request:
                 return request.build_absolute_uri(self.profile_image.url)
             else:
                 # Fallback to manual construction
                 return f"{settings.MEDIA_URL}{self.profile_image.name}"
         return None
+
+    def get_user_info(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "full_name": self.full_name,
+            "phone_number": self.phone_number,
+            "address": self.address,
+            "profile_image": self.get_profile_image_url(),
+        }

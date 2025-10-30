@@ -18,6 +18,8 @@ frontend_guide.*
 db.sqlite3
 identifier.sqlite
 
+*.sqlite3
+
 *.log
 *.pot
 *.pyc

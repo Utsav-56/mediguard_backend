@@ -15,6 +15,16 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 ---
 
 ## API Endpoints
+the following are the main API endpoints provided by the Accounts app, along with their expected request and response formats.
+
+1. `POST /auth/users/` - User Registration
+2. `POST /auth/login/` - User Login (Token Creation)
+3. `POST /auth/jwt/refresh/` - Token Refresh
+4. `POST /auth/jwt/verify/` - Token Verification
+5. `GET /auth/users/me/` - Get Current User Profile
+6. `PUT /auth/users/me/` or `PATCH /auth/users/me/` - Update Current User Profile
+
+---
 
 ### 1. User Registration
 
@@ -26,12 +36,11 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"email": "user@example.com",
-	"password": "securePassword123",
-	"full_name": "John Doe",
-	"phone_number": "+1234567890", // optional
-	"address": "123 Main St, City", // optional
-	"profile_image": null // optional, file upload
+  "email": "bruce.wyane@example.com",
+  "password": "123@J456789",
+  "full_name": "Bruce Wayne",
+  "phone_number": "+9700123456",
+  "address": "Wayne Manor, Gotham City",
 }
 ```
 
@@ -41,13 +50,13 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 {
 	"success": true,
 	"response": {
-		"id": 1,
-		"email": "user@example.com",
-		"full_name": "John Doe",
-		"phone_number": "+1234567890",
-		"address": "123 Main St, City",
-		"profile_image": null
-	}
+            "id": 9,
+            "email": "bruce.wyane@example.com",
+            "full_name": "Bruce Wayne",
+            "phone_number": "+9700",
+            "address": "Wayne Manor, Gotham City",
+            "profile_image": null
+        }
 }
 ```
 
@@ -55,12 +64,21 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": false,
-	"error": {
-		"name": "Signup validation error",
-		"message": "Invalid registration data.",
-		"details": "User with this email already exists."
-	}
+    "success": false,
+    "response": null,
+    "error": {
+        "message": "An error occurred",
+        "details": {
+            "email": [
+                "user with this email already exists."
+            ],
+            "phone_number": [
+                "Phone number must be between 7-13 digits",
+                "Phone number can only contain digits or a plus sign.",
+                "Phone number must not contain consecutive special characters."
+            ]
+        }
+    }
 }
 ```
 
@@ -74,15 +92,15 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ### 2. User Login (Token Creation)
 
-**Endpoint:** `POST /auth/jwt/create/`
+**Endpoint:** `POST /auth/login/`
 
-**Description:** Authenticates a user and returns JWT access and refresh tokens.
+**Description:** Authenticates a user and returns JWT access and refresh tokens along with the user info of the user.
 
 **Expected Request Data:**
 
 ```json
 {
-	"email": "user@example.com",
+	"email": "bruce.wyane@example.com",
 	"password": "securePassword123"
 }
 ```
@@ -91,11 +109,22 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": true,
-	"response": {
-		"access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-		"refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
-	}
+    "success": true,
+    "response": {
+        "tokens": {
+            "refresh": "eyJhbGciOiJIUzI1N...",
+            "access": "eyJhbGciOiJIUzI1Ni..."
+        },
+        "user": {
+            "id": 9,
+            "email": "bruce.wyane@example.com",
+            "full_name": "Bruce Wayne",
+            "phone_number": "+9700",
+            "address": "Wayne Manor, Gotham City",
+            "profile_image": null
+        }
+    },
+    "error": null
 }
 ```
 
@@ -103,14 +132,23 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": false,
-	"error": {
-		"name": "Login Error",
-		"message": "Invalid credentials.",
-		"details": "No active account found with the given credentials"
-	}
+    "success": false,
+    "response": null,
+    "error": {
+        "message": "Email does not exist",
+        "details": {
+            "email": "No account found with the provided email"
+        }
+    }
 }
 ```
+
+**Response format description:**
+In case of error response, 
+- the "error" key contains the error details, while the "response" key is null.
+- the details will be a key value pair where key is the field name and value is the error message.
+- the "message" key provides a general description of the error.
+
 
 **Developer Tips:**
 
@@ -140,7 +178,8 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 {
 	"success": true,
 	"response": {
-		"access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+		"access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+                "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
 	}
 }
 ```
@@ -149,12 +188,15 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": false,
-	"error": {
-		"name": "error",
-		"message": "Token refresh failed.",
-		"details": "Token is invalid or expired"
-	}
+    "success": false,
+    "response": null,
+    "error": {
+        "message": "Token is invalid",
+        "details": {
+            "detail": "Token is invalid",
+            "code": "token_not_valid"
+        }
+    }
 }
 ```
 
@@ -183,10 +225,9 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": true,
-	"response": {
-		"message": "Token is valid."
-	}
+    "success": true,
+    "response": {},
+    "error": null
 }
 ```
 
@@ -194,12 +235,15 @@ It uses djoser for token-based authentication and provides endpoints for user-re
 
 ```json
 {
-	"success": false,
-	"error": {
-		"name": "error",
-		"message": "Invalid token.",
-		"details": "Token is invalid or expired"
-	}
+    "success": false,
+    "response": null,
+    "error": {
+        "message": "Token is invalid",
+        "details": {
+            "detail": "Token is invalid",
+            "code": "token_not_valid"
+        }
+    }
 }
 ```
 
@@ -228,15 +272,16 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-	"success": true,
-	"response": {
-		"id": 1,
-		"email": "user@example.com",
-		"full_name": "John Doe",
-		"phone_number": "+1234567890",
-		"address": "123 Main St, City",
-		"profile_image": "http://localhost:8000/media/profile_images/user_1.jpg"
-	}
+    "success": true,
+    "response": {
+        "id": 9,
+        "email": "bruce.wjmjakjyne@example.com",
+        "full_name": "Bruce Wayne",
+        "phone_number": "+9700",
+        "address": "Wayne Manor, Gotham City",
+        "profile_image": null
+    },
+    "error": null
 }
 ```
 
@@ -244,12 +289,14 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-	"success": false,
-	"error": {
-		"name": "Unauthorized",
-		"message": "Authentication credentials were not provided.",
-		"details": ""
-	}
+    "success": false,
+    "response": null,
+    "error": {
+        "message": "Authentication credentials were not provided.",
+        "details": {
+            "detail": "Authentication credentials were not provided."
+        }
+    }
 }
 ```
 
@@ -272,16 +319,19 @@ Authorization: Bearer <access_token>
 ```
 Authorization: Bearer <access_token>
 Content-Type: multipart/form-data  // when updating profile_image
+Content-Type: application/json    // for other fields
 ```
 
 **Expected Request Data:**
 
 ```json
 {
-    "full_name": "John Updated Doe",
-    "phone_number": "+9876543210",
-    "address": "456 New St, New City",
-    "profile_image": <file>  // optional
+  "email": "bruce.wyane@example.com", // Email cannot be changed
+  "password": "123@J456789", // New password to update
+  "full_name": "Bruce Wayne Edited", // New name to update
+  "phone_number": "+9700123456", 
+  "address": "Wayne Manor, Gotham City",
+    "profile_image": <file> // optional, file upload (use multipart/form-data)
 }
 ```
 
@@ -289,15 +339,16 @@ Content-Type: multipart/form-data  // when updating profile_image
 
 ```json
 {
-	"success": true,
-	"response": {
-		"id": 1,
-		"email": "user@example.com",
-		"full_name": "John Updated Doe",
-		"phone_number": "+9876543210",
-		"address": "456 New St, New City",
-		"profile_image": "http://localhost:8000/media/profile_images/user_1.jpg"
-	}
+    "success": true,
+    "response": {
+        "id": 9,
+        "email": "bruce.wyane@example.com",
+        "full_name": "Bruce Wayne edited",
+        "phone_number": "+9700123456",
+        "address": "Wayne Manor, Gotham City",
+        "profile_image": null
+    },
+    "error": null
 }
 ```
 
@@ -311,13 +362,14 @@ Content-Type: multipart/form-data  // when updating profile_image
 
 ## Response Mechanism
 
-The app uses a custom response utility to ensure consistent API responses across all endpoints. The response is always structured in JSON format.
+The app uses a custom response structure to ensure consistent API responses across all endpoints. 
+The response is always structured in JSON format and includes the following keys:
 
 ### Response Keys:
 
 1. **success** (boolean) - Indicates whether the request was successful or not. This key is always present in every response.
 
-2. **response** (object) - Contains the actual response data when the request is successful. Only present on successful requests.
+2. **response** (object) - Contains the actual response data when the request is successful.(It is always present but can be null in error responses)
 
 3. **error** (object) - Contains error details when the request fails. Only present on failed requests.
 
@@ -341,31 +393,53 @@ The app uses a custom response utility to ensure consistent API responses across
 		"name": "error_name",
 		"message": "Error description",
 		"details": "Additional error details"
-	}
+	},
+    "response": null // but it is not 100% guranteed to be null even in error responses
 }
 ```
 
-### Response Utility Functions
+[//]: # ()
+[//]: # (### Response Utility Functions &#40;For Developers&#41;)
 
-```python
-# Success response with data and status code
-def success_response(data, status=200):
-    return Response({"success": True, "response": data}, status=status)
+[//]: # (The following is the code snippet for the response utility functions used to generate consistent responses:)
 
-# Error response with message, details, error name, and status code
-def error_response(message, details="", error_name="error", status=400):
-    return Response(
-        {
-            "success": False,
-            "error": {"name": error_name, "message": message, "details": details},
-        },
-        status=status,
-    )
-```
+[//]: # ()
+[//]: # ()
+[//]: # (```python)
+
+[//]: # (# Success response with data and status code)
+
+[//]: # (def success_response&#40;data, status=200&#41;:)
+
+[//]: # (    return Response&#40;{"success": True, "response": data}, status=status&#41;)
+
+[//]: # ()
+[//]: # (# Error response with message, details, error name, and status code)
+
+[//]: # (def error_response&#40;message, details="", error_name="error", status=400&#41;:)
+
+[//]: # (    return Response&#40;)
+
+[//]: # (        {)
+
+[//]: # (            "success": False,)
+
+[//]: # (            "error": {"name": error_name, "message": message, "details": details},)
+
+[//]: # (        },)
+
+[//]: # (        status=status,)
+
+[//]: # (    &#41;)
+
+[//]: # (```)
 
 ---
 
-## Working with the User Model
+## Working with the User Model (For Developers)
+
+The app uses a custom User model that extends Django's built-in AbstractBaseUser and PermissionsMixin. This allows for email-based authentication and additional profile fields.
+
 
 ### Current Model Structure
 
@@ -386,6 +460,9 @@ To add new fields to the User model:
 1. **Add the field to the model** (`accounts/models.py`):
 
 ```python
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+
 class User(AbstractBaseUser, PermissionsMixin):
     # ...existing fields...
 
@@ -407,6 +484,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 2. **Update the serializers** (`accounts/serializers.py`):
 
 ```python
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from djoser.serializers import UserSerializer as BaseUserSerializer
+from rest_framework import serializers
+
+from .models import User
+
 class UserCreateSerializer(BaseUserCreateSerializer):
     # Add new fields here
     date_of_birth = serializers.DateField(required=False, allow_null=True)
@@ -449,6 +532,12 @@ class UserSerializer(BaseUserSerializer):
 ```bash
 python manage.py makemigrations
 python manage.py migrate
+```
+**If using UV (Which is highly recommended):**
+
+```bash
+uv run manage.py makemigrations
+uv run manage.py migrate
 ```
 
 ### Field Options Guide
