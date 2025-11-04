@@ -1,9 +1,7 @@
-from djoser.views import TokenCreateView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from social_core.pipeline import user
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.utils.response_models import ErrorResponse
 

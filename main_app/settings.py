@@ -44,7 +44,6 @@ LOGGING = {
 
 # Application definition
 INSTALLED_APPS = [
-    
     # Default Django apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -52,14 +51,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
     # Third-party apps
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
     "rest_framework_simplejwt",
     "django_extensions",
-    
     # Local apps
     "accounts",
     "image_processer",
@@ -111,8 +108,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
-
     # Custom Middleware
     # this middleware wraps all responses in a consistent JSON structure
     "core.middleware.response_wrapper.ResponseWrapperMiddleware",
@@ -139,8 +134,12 @@ WSGI_APPLICATION = "main_app.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "mediguard",
+        "USER": "postgres",
+        "PASSWORD": "",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 

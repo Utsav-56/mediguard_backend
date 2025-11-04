@@ -2,7 +2,6 @@ import json
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.response import Response as DRFResponse
-from core.utils.response_models import ErrorResponse, SuccessResponse
 
 
 class ResponseWrapperMiddleware(MiddlewareMixin):
@@ -56,7 +55,6 @@ class ResponseWrapperMiddleware(MiddlewareMixin):
         return None, None
 
     def _build_wrapped_data(self, data, status_code):
-
         # check if the data is already wrapped
         # we check if the keys 'success', 'response', and 'error' are present in the data
         # if there are success and any one of response or error keys present we consider it as already wrapped
