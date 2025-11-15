@@ -30,7 +30,7 @@ urlpatterns = [
     # Local apps
     path("upload/", include("image_processer.urls")),
     path("ping/", include("ping.urls")),
-    path("medicines/", include("medicines.urls")),
+    path("medicine/", include("medicines.urls")),
 ]
 
 
