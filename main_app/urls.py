@@ -29,8 +29,11 @@ urlpatterns = [
     path("auth/", include("accounts.urls")),
     # Local apps
     path("upload/", include("image_processer.urls")),
-    path("ping/", include("ping.urls")),
+    path("server/", include("ping.urls")),
     path("medicine/", include("medicines.urls")),
+
+
+    path("", include("ping.urls")),  # Default to ping app
 ]
 
 
