@@ -8,12 +8,56 @@ The Medicines app provides a complete REST API for managing medicine schedules i
 
 ## Table of Contents
 
+- [Response Structure](#response-structure)
 - [Authentication](#authentication)
 - [API Endpoints](#api-endpoints)
 - [Data Models](#data-models)
 - [Request & Response Examples](#request--response-examples)
 - [Error Handling](#error-handling)
 - [Field Validations](#field-validations)
+
+---
+
+## Response Structure
+
+All API responses are wrapped in a consistent structure by the `ResponseWrapperMiddleware`. This ensures uniform handling of both success and error cases.
+
+### Success Response Format
+
+```json
+{
+	"success": true,
+	"response": {
+		// Your actual data here
+	},
+	"error": null
+}
+```
+
+### Error Response Format
+
+```json
+{
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Error message here",
+		"details": {
+			// Additional error details
+		}
+	}
+}
+```
+
+### Response Fields
+
+| Field           | Type              | Description                                              |
+| --------------- | ----------------- | -------------------------------------------------------- |
+| `success`       | Boolean           | `true` for 2xx status codes, `false` for errors          |
+| `response`      | Object/Array/null | Contains the actual data on success, `null` on error     |
+| `error`         | Object/null       | Contains error information on failure, `null` on success |
+| `error.message` | String            | Human-readable error message                             |
+| `error.details` | Object            | Detailed error information (validation errors, etc.)     |
 
 ---
 
@@ -31,7 +75,14 @@ Authorization: Token YOUR_AUTH_TOKEN_HERE
 
 ```json
 {
-	"detail": "Auth token is needed for this endpoint (invalid request)"
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Auth token is needed for this endpoint (invalid request)",
+		"details": {
+			"detail": "Auth token is needed for this endpoint (invalid request)"
+		}
+	}
 }
 ```
 
@@ -119,32 +170,36 @@ Authorization: Token abc123xyz456
 **Success Response (200 OK):**
 
 ```json
-[
-	{
-		"id": 1,
-		"name": "Paracetamol",
-		"amount": 2,
-		"dosage": 500,
-		"time": ["08:00", "14:00", "20:00"],
-		"days_of_week": [1, 2, 3, 4, 5, 6, 7],
-		"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
-		"help_message": "Take after meals with water",
-		"start_date": "2025-11-26T08:00:00Z",
-		"end_date": "2025-12-26T20:00:00Z"
-	},
-	{
-		"id": 2,
-		"name": "Vitamin D",
-		"amount": 1,
-		"dosage": 1000,
-		"time": ["09:00"],
-		"days_of_week": [1, 2, 3, 4, 5, 6, 7],
-		"image_url": null,
-		"help_message": "Take with breakfast",
-		"start_date": "2025-11-20T09:00:00Z",
-		"end_date": null
-	}
-]
+{
+	"success": true,
+	"response": [
+		{
+			"id": 1,
+			"name": "Paracetamol",
+			"amount": 2,
+			"dosage": 500,
+			"time": ["08:00", "14:00", "20:00"],
+			"days_of_week": [1, 2, 3, 4, 5, 6, 7],
+			"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
+			"help_message": "Take after meals with water",
+			"start_date": "2025-11-26T08:00:00Z",
+			"end_date": "2025-12-26T20:00:00Z"
+		},
+		{
+			"id": 2,
+			"name": "Vitamin D",
+			"amount": 1,
+			"dosage": 1000,
+			"time": ["09:00"],
+			"days_of_week": [1, 2, 3, 4, 5, 6, 7],
+			"image_url": null,
+			"help_message": "Take with breakfast",
+			"start_date": "2025-11-20T09:00:00Z",
+			"end_date": null
+		}
+	],
+	"error": null
+}
 ```
 
 ---
@@ -191,16 +246,20 @@ Content-Type: application/json
 
 ```json
 {
-	"id": 3,
-	"name": "Metformin",
-	"amount": 1,
-	"dosage": 500,
-	"time": ["08:00", "20:00"],
-	"days_of_week": [2, 3, 4, 5, 6],
-	"image_url": null,
-	"help_message": "Take with food. Skip on weekends.",
-	"start_date": "2025-11-26T08:00:00Z",
-	"end_date": "2026-11-26T20:00:00Z"
+	"success": true,
+	"response": {
+		"id": 3,
+		"name": "Metformin",
+		"amount": 1,
+		"dosage": 500,
+		"time": ["08:00", "20:00"],
+		"days_of_week": [2, 3, 4, 5, 6],
+		"image_url": null,
+		"help_message": "Take with food. Skip on weekends.",
+		"start_date": "2025-11-26T08:00:00Z",
+		"end_date": "2026-11-26T20:00:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -208,9 +267,16 @@ Content-Type: application/json
 
 ```json
 {
-	"name": ["This field is required."],
-	"amount": ["This field is required."],
-	"time": ["This field is required."]
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Bad Request",
+		"details": {
+			"name": ["This field is required."],
+			"amount": ["This field is required."],
+			"time": ["This field is required."]
+		}
+	}
 }
 ```
 
@@ -244,16 +310,20 @@ start_date: 2025-11-26T08:00:00Z
 
 ```json
 {
-	"id": 4,
-	"name": "Ibuprofen",
-	"amount": 2,
-	"dosage": 200,
-	"time": ["08:00", "16:00"],
-	"days_of_week": [1, 2, 3, 4, 5, 6, 7],
-	"image_url": "http://localhost:8000/media/medicines/medicine_4.jpg",
-	"help_message": "Anti-inflammatory",
-	"start_date": "2025-11-26T08:00:00Z",
-	"end_date": null
+	"success": true,
+	"response": {
+		"id": 4,
+		"name": "Ibuprofen",
+		"amount": 2,
+		"dosage": 200,
+		"time": ["08:00", "16:00"],
+		"days_of_week": [1, 2, 3, 4, 5, 6, 7],
+		"image_url": "http://localhost:8000/media/medicines/medicine_4.jpg",
+		"help_message": "Anti-inflammatory",
+		"start_date": "2025-11-26T08:00:00Z",
+		"end_date": null
+	},
+	"error": null
 }
 ```
 
@@ -277,16 +347,20 @@ Authorization: Token abc123xyz456
 
 ```json
 {
-	"id": 1,
-	"name": "Paracetamol",
-	"amount": 2,
-	"dosage": 500,
-	"time": ["08:00", "14:00", "20:00"],
-	"days_of_week": [1, 2, 3, 4, 5, 6, 7],
-	"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
-	"help_message": "Take after meals with water",
-	"start_date": "2025-11-26T08:00:00Z",
-	"end_date": "2025-12-26T20:00:00Z"
+	"success": true,
+	"response": {
+		"id": 1,
+		"name": "Paracetamol",
+		"amount": 2,
+		"dosage": 500,
+		"time": ["08:00", "14:00", "20:00"],
+		"days_of_week": [1, 2, 3, 4, 5, 6, 7],
+		"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
+		"help_message": "Take after meals with water",
+		"start_date": "2025-11-26T08:00:00Z",
+		"end_date": "2025-12-26T20:00:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -294,7 +368,14 @@ Authorization: Token abc123xyz456
 
 ```json
 {
-	"detail": "Medicine not found"
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Medicine not found",
+		"details": {
+			"detail": "Medicine not found"
+		}
+	}
 }
 ```
 
@@ -326,16 +407,20 @@ Content-Type: application/json
 
 ```json
 {
-	"id": 1,
-	"name": "Paracetamol",
-	"amount": 2,
-	"dosage": 500,
-	"time": ["09:00", "15:00", "21:00"],
-	"days_of_week": [1, 2, 3, 4, 5, 6, 7],
-	"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
-	"help_message": "Updated: Take 1 hour after meals",
-	"start_date": "2025-11-26T08:00:00Z",
-	"end_date": "2025-12-26T20:00:00Z"
+	"success": true,
+	"response": {
+		"id": 1,
+		"name": "Paracetamol",
+		"amount": 2,
+		"dosage": 500,
+		"time": ["09:00", "15:00", "21:00"],
+		"days_of_week": [1, 2, 3, 4, 5, 6, 7],
+		"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
+		"help_message": "Updated: Take 1 hour after meals",
+		"start_date": "2025-11-26T08:00:00Z",
+		"end_date": "2025-12-26T20:00:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -373,16 +458,20 @@ Content-Type: application/json
 
 ```json
 {
-	"id": 1,
-	"name": "Paracetamol Extended",
-	"amount": 3,
-	"dosage": 650,
-	"time": ["10:00", "16:00"],
-	"days_of_week": [2, 3, 4, 5, 6],
-	"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
-	"help_message": "Completely updated medicine info",
-	"start_date": "2025-11-27T10:00:00Z",
-	"end_date": "2025-12-27T16:00:00Z"
+	"success": true,
+	"response": {
+		"id": 1,
+		"name": "Paracetamol Extended",
+		"amount": 3,
+		"dosage": 650,
+		"time": ["10:00", "16:00"],
+		"days_of_week": [2, 3, 4, 5, 6],
+		"image_url": "http://localhost:8000/media/medicines/medicine_1.jpg",
+		"help_message": "Completely updated medicine info",
+		"start_date": "2025-11-27T10:00:00Z",
+		"end_date": "2025-12-27T16:00:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -404,15 +493,26 @@ Authorization: Token abc123xyz456
 
 **Success Response (204 No Content):**
 
-```
-(No response body)
+```json
+{
+	"success": true,
+	"response": {},
+	"error": null
+}
 ```
 
 **Error Response (404 Not Found):**
 
 ```json
 {
-	"detail": "Medicine not found"
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Medicine not found",
+		"details": {
+			"detail": "Medicine not found"
+		}
+	}
 }
 ```
 
@@ -609,9 +709,13 @@ response = requests.get(
     headers=headers
 )
 
-medicines = response.json()
-for medicine in medicines:
-    print(f"{medicine['id']}: {medicine['name']} - {medicine['dosage']}mg")
+data = response.json()
+if data['success']:
+    medicines = data['response']
+    for medicine in medicines:
+        print(f"{medicine['id']}: {medicine['name']} - {medicine['dosage']}mg")
+else:
+    print(f"Error: {data['error']['message']}")
 ```
 
 ### Update Medicine
@@ -628,7 +732,11 @@ response = requests.patch(
     json=update_data
 )
 
-print(f"Updated: {response.json()}")
+data = response.json()
+if data['success']:
+    print(f"Updated: {data['response']}")
+else:
+    print(f"Error: {data['error']['message']}")
 ```
 
 ### Delete Medicine
@@ -639,7 +747,8 @@ response = requests.delete(
     headers=headers
 )
 
-print(f"Deleted: {response.status_code == 204}")
+data = response.json()
+print(f"Deleted: {data['success']}")
 ```
 
 ---
@@ -657,15 +766,44 @@ print(f"Deleted: {response.status_code == 204}")
 | 401  | Unauthorized | Missing or invalid authentication token   |
 | 404  | Not Found    | Medicine with specified ID not found      |
 
+**Note:** All responses (including errors) are wrapped in the standard response format with `success`, `response`, and `error` fields.
+
 ### Validation Error Example
+
+**Response (400 Bad Request):**
 
 ```json
 {
-	"name": ["This field is required."],
-	"amount": ["A valid integer is required."],
-	"time": ["This field is required."],
-	"days_of_week": ["This field is required."]
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Bad Request",
+		"details": {
+			"name": ["This field is required."],
+			"amount": ["A valid integer is required."],
+			"time": ["This field is required."],
+			"days_of_week": ["This field is required."]
+		}
+	}
 }
+```
+
+### Handling Wrapped Responses
+
+When working with the API, always check the `success` field first:
+
+```python
+response = requests.get(f"{BASE_URL}/medicines/list/", headers=headers)
+data = response.json()
+
+if data['success']:
+    # Success - data is in 'response' field
+    medicines = data['response']
+    print(medicines)
+else:
+    # Error - error info is in 'error' field
+    print(f"Error: {data['error']['message']}")
+    print(f"Details: {data['error']['details']}")
 ```
 
 ---
@@ -699,60 +837,24 @@ print(f"Deleted: {response.status_code == 204}")
 - 1 = Sunday, 2 = Monday, ..., 7 = Saturday
 - Can be a subset (e.g., [2, 4, 6] for Mon, Wed, Fri)
 
----
-
-## Frontend Integration (Dart/Flutter)
-
-### Example Dart Model Mapping
-
-The backend is designed to work seamlessly with the Dart `Medicine` model:
-
-```dart
-// Dart model fields map directly to API response
-{
-  id: 1,                              // → final int id
-  name: "Paracetamol",                // → final String name
-  amount: 2,                           // → final int amount
-  dosage: 500,                         // → final int dosage
-  time: ["08:00", "14:00", "20:00"],  // → final Set<DateTime> time
-  days_of_week: [1, 2, 3, 4, 5, 6, 7], // → final Set<int> daysOfWeek
-  image_url: "http://...",             // → final String? imageUrl
-  help_message: "Take after meals",    // → final String? helpMessage
-  start_date: "2025-11-26T08:00:00Z"   // → final DateTime? startDate
-}
-```
-
-### Converting Time Strings to DateTime (Dart)
-
-```dart
-Set<DateTime> parseTimeStrings(List<dynamic> timeStrings) {
-  final now = DateTime.now();
-  return timeStrings.map((timeStr) {
-    final parts = timeStr.split(':');
-    return DateTime(now.year, now.month, now.day,
-                    int.parse(parts[0]), int.parse(parts[1]));
-  }).toSet();
-}
-```
-
----
-
 ## Notes
 
-1. **User Isolation**: Users can only access their own medicines. The `user` field is automatically assigned from the authentication token.
+1. **Response Wrapper**: All responses are wrapped in a consistent structure with `success`, `response`, and `error` fields. Always check the `success` field first before accessing data.
 
-2. **Image Handling**:
+2. **User Isolation**: Users can only access their own medicines. The `user` field is automatically assigned from the authentication token.
+
+3. **Image Handling**:
     - Images are stored in `MEDIA_ROOT/medicines/`
     - Use `multipart/form-data` when uploading images
     - The `image_url` field returns the full URL
 
-3. **Date Format**: All datetime fields use ISO 8601 format (e.g., "2025-11-26T08:00:00Z")
+4. **Date Format**: All datetime fields use ISO 8601 format (e.g., "2025-11-26T08:00:00Z")
 
-4. **Time Array**: The `time` field can contain multiple time slots for medicines taken multiple times per day
+5. **Time Array**: The `time` field can contain multiple time slots for medicines taken multiple times per day
 
-5. **Days of Week**: Stored as integers where Sunday=1 and Saturday=7
+6. **Days of Week**: Stored as integers where Sunday=1 and Saturday=7
 
-6. **Partial Updates**: Use PATCH to update only specific fields, PUT requires all required fields
+7. **Partial Updates**: Use PATCH to update only specific fields, PUT requires all required fields
 
 ---
 
