@@ -20,6 +20,9 @@ identifier.sqlite
 
 *.sqlite3
 
+run.ps1
+z_logs/*
+
 *.log
 *.pot
 *.pyc

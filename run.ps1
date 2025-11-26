@@ -25,7 +25,7 @@ if (Test-Path $venvActivate) {
 
 #region Logging Functions
 function Get-LogFilePath {
-    param([string]$Prefix = "pg_db")
+    param([string]$Prefix = "postgres")
     
     $sessionId = Get-Date -Format "yyyy_MM_dd__HH_mm_ss"
     $logDir = Join-Path $script:Config.Root $script:Config.LogsDir
@@ -74,49 +74,20 @@ function Get-PostgreSQLPaths {
     return @{
         Version = $latestVersion.Name
         BinPath = Join-Path $latestVersion.FullName "bin"
-        DataPath = Join-Path $script:Config.DBnginBasePath "Data\postgresql\$($latestVersion.Name)"
         ExePath = Join-Path $latestVersion.FullName "bin\postgres.exe"
     }
 }
 
-function Test-PostgreSQLRunning {
-    param([string]$Port = $script:Config.PostgresPort)
+function Get-ProcessUsingPort {
+    param([string]$Port)
     
-    # Test port connectivity
-    $tcpTest = Test-NetConnection -ComputerName "localhost" -Port $Port -WarningAction SilentlyContinue -InformationAction SilentlyContinue 
-    
-    Start-Sleep -Milliseconds 200
-
-    if (-not $tcpTest.TcpTestSucceeded) {
-        Write-Log "Port $Port is not in use" -Level Info
-        return $false
+    $netstat = netstat -ano | Select-String ":$Port\s" | Select-Object -First 1
+    if ($netstat) {
+        $processId = ($netstat -split '\s+')[-1]
+        $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+        return $process
     }
-    
-    # Verify it's the correct PostgreSQL instance
-    try {
-        $paths = Get-PostgreSQLPaths
-        $runningProcesses = Get-Process -Name postgres -ErrorAction SilentlyContinue
-        
-        foreach ($proc in $runningProcesses) {
-            try {
-                $procPath = (Get-Process -Id $proc.Id -FileVersionInfo).FileName
-                if ($procPath -eq $paths.ExePath) {
-                    $customLogDir = Join-Path $script:Config.Root $script:Config.LogsDir
-                    Write-Log "PostgreSQL $($paths.Version) is running on port $Port" -Level Info
-                    Write-Log "Session logs: $customLogDir" -Level Info
-                    
-                    return $true
-                }
-            } catch { continue }
-        }
-        
-        Write-Log "Port $Port is in use by another process" -Level Warning
-        return $false
-    }
-    catch {
-        Write-Log "Error checking PostgreSQL status: $_" -Level Error
-        return $false
-    }
+    return $null
 }
 
 function Start-PostgreSQL {
@@ -124,36 +95,65 @@ function Start-PostgreSQL {
     
     try {
         $paths = Get-PostgreSQLPaths
-        $logFile = Get-LogFilePath -Prefix "postgres"
-        
-        if (-not (Test-Path $paths.DataPath)) {
-            throw "Data directory not found at $($paths.DataPath)"
-        }
+        $logFile = Get-LogFilePath
         
         # Add binaries to PATH
         $env:PATH = "$($paths.BinPath);$env:PATH"
         
-        Write-Log "Starting PostgreSQL $($paths.Version)" -Level Info
-        Write-Log "Port: $Port | Session log: $logFile" -Level Info
+        Write-Log "Starting PostgreSQL $($paths.Version) on port $Port" -Level Info
+        Write-Log "Session log: $logFile" -Level Info
         
-        # Start PostgreSQL with stdout/stderr redirected to custom log location
-        Start-Process -FilePath $paths.ExePath `
-                      -ArgumentList "-D `"$($paths.DataPath)`" -p $Port" `
+        # Start PostgreSQL - redirect stderr to stdout by using 2>&1 in the command
+        $process = Start-Process -FilePath $paths.ExePath `
+                      -ArgumentList "-p $Port" `
                       -RedirectStandardOutput $logFile `
-                      -RedirectStandardError $logFile `
-                      -NoNewWindow
+                      -NoNewWindow `
+                      -PassThru
         
-        Write-Log "PostgreSQL started successfully" -Level Info
-        Write-Log "All logs are being written to: $(Join-Path $script:Config.Root $script:Config.LogsDir)" -Level Info
+        # Wait a moment to see if it starts
+        Start-Sleep -Seconds 2
         
+        if ($process.HasExited) {
+            throw "PostgreSQL failed to start. Check log: $logFile"
+        }
+        
+        Write-Log "PostgreSQL started successfully (PID: $($process.Id))" -Level Info
         return $true
     }
     catch {
         Write-Log "Failed to start PostgreSQL: $_" -Level Error
+        
+        # Check if port is in use
+        $blockingProcess = Get-ProcessUsingPort -Port $Port
+        
+        if ($blockingProcess) {
+            Write-Log "Port $Port is being used by: $($blockingProcess.ProcessName) (PID: $($blockingProcess.Id))" -Level Warning
+            
+            $response = Read-Host "Do you want to kill this process and retry? (Y/N)"
+            
+            if ($response -eq 'Y' -or $response -eq 'y') {
+                try {
+                    Stop-Process -Id $blockingProcess.Id -Force
+                    Write-Log "Process killed. Retrying..." -Level Info
+                    Start-Sleep -Seconds 1
+                    
+                    # Retry starting PostgreSQL
+                    return Start-PostgreSQL -Port $Port
+                }
+                catch {
+                    Write-Log "Failed to kill process: $_" -Level Error
+                    return $false
+                }
+            }
+            else {
+                Write-Log "User chose not to kill the blocking process" -Level Info
+                return $false
+            }
+        }
+        
         return $false
     }
 }
-#endregion
 
 #region Network Functions
 function Get-LocalIPAddress {
@@ -212,17 +212,10 @@ function Start-Application {
     
     Write-Log "Starting MediGuard Backend..." -Level Info
     
-    # Ensure PostgreSQL is running
-    if (-not (Test-PostgreSQLRunning)) {
-        Write-Log "Starting PostgreSQL server..." -Level Info
-        
-        if (Start-PostgreSQL) {
-            Start-Sleep -Seconds 3  # Brief wait for server initialization
-        }
-        else {
-            Write-Log "PostgreSQL failed to start. Exiting." -Level Error
-            exit 1
-        }
+    # Start PostgreSQL
+    if (-not (Start-PostgreSQL)) {
+        Write-Log "PostgreSQL failed to start. Exiting." -Level Error
+        exit 1
     }
     
     # Start Django server

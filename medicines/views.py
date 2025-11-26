@@ -1,17 +1,21 @@
 # Create your views here.
-
-# /medicine route will be the main entry point for all medicine related operations
-# /medicine will support GET, POST, PUT, DELETE methods
-# it must need to be authenticated to access every route
-#
-# GET /medicine will return all medicines of  user
-# POST /medicine will create a new medicine for  user
-# PUT /medicine/<int:medicine_id> will update the medicine with the given id for  user
-# DELETE /medicine/<int:medicine_id> will delete the medicine with the given id for  user
-
-# GET /medicine/<int:medicine_id> will return the medicine with the given id for  user
-# PUT /medicine/<int:medicine_id> will update the medicine with the given id for  user
-# DELETE /medicine/<int:medicine_id> will delete the medicine with the given id for user
+"""
+Medicine Management Views Module
+This module provides API endpoints for managing medicines in the MediGuard system.
+All endpoints require user authentication via token.
+Endpoints:
+    - GET /medicines/list/ - Retrieve all medicines for authenticated user
+    - POST /medicines/list/ - Create a new medicine for authenticated user
+    - POST /medicines/add/ - Create a new medicine (alternative endpoint)
+    - GET /medicines/detail/<int:medicine_id>/ - Retrieve specific medicine details
+    - POST /medicines/detail/<int:medicine_id>/ - Update specific medicine (alternative)
+    - PATCH/PUT /medicines/update/<int:medicine_id>/ - Update specific medicine
+    - DELETE /medicines/delete/<int:medicine_id>/ - Delete specific medicine
+Authentication:
+    All endpoints require valid authentication token. Unauthorized requests
+    will receive 401 UNAUTHORIZED response.
+Author: MediGuard Backend Team
+"""
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -26,34 +30,38 @@ def check_authentication(request):
     if not request.user.is_authenticated:
         return Response(
             {"detail": "Auth token is needed for this endpoint (invalid request)"},
-            status=status.HTTP_401_UNAUTHORIZED
+            status=status.HTTP_401_UNAUTHORIZED,
         )
     return None
 
 
-@api_view(["GET"])
+# 1. List view - GET or POST both allowed
+@api_view(["GET", "POST"])
 def medicines_list(request):
     auth_response = check_authentication(request)
     if auth_response:
         return auth_response
-    
-    medicines = Medicines.objects.filter(user=request.user)
-    serializer = MedicineSerializer(medicines, many=True)
-    return Response(serializer.data)
+
+    if request.method == "GET":
+        medicines = Medicines.objects.filter(user=request.user)
+        serializer = MedicineSerializer(medicines, many=True)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        serializer = MedicineSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
-def medicines_create(request):
-    if request.method != "POST":
-        return Response(
-            {"detail": f"(Invalid method) only POST method is allowed here but provided with {request.method}"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-    
+# 2. Add view - POST only
+@api_view(["POST"])
+def medicines_add(request):
     auth_response = check_authentication(request)
     if auth_response:
         return auth_response
-    
+
     serializer = MedicineSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(user=request.user)
@@ -61,67 +69,69 @@ def medicines_create(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+# 3. Detail view - GET or POST both allowed
+@api_view(["GET", "POST"])
 def medicine_detail(request, medicine_id):
-    if request.method != "GET":
-        return Response(
-            {"detail": f"(Invalid method) only GET method is allowed here but provided with {request.method}"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-    
     auth_response = check_authentication(request)
     if auth_response:
         return auth_response
-    
+
     try:
         medicine = Medicines.objects.get(id=medicine_id, user=request.user)
     except Medicines.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Medicine not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
-    serializer = MedicineSerializer(medicine)
-    return Response(serializer.data)
+    if request.method == "GET":
+        serializer = MedicineSerializer(medicine)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        serializer = MedicineSerializer(medicine, data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+# 4. Update view - PATCH or PUT
+@api_view(["PATCH", "PUT"])
 def medicine_update(request, medicine_id):
-    if request.method != "PUT":
-        return Response(
-            {"detail": f"(Invalid method) only PUT method is allowed here but provided with {request.method}"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-    
     auth_response = check_authentication(request)
     if auth_response:
         return auth_response
-    
+
     try:
         medicine = Medicines.objects.get(id=medicine_id, user=request.user)
     except Medicines.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Medicine not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
-    serializer = MedicineSerializer(medicine, data=request.data)
+    # partial=True for PATCH, partial=False for PUT
+    partial = request.method == "PATCH"
+    serializer = MedicineSerializer(medicine, data=request.data, partial=partial)
+
     if serializer.is_valid():
         serializer.save(user=request.user)
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
+# 5. Delete view - DELETE only
+@api_view(["DELETE"])
 def medicine_delete(request, medicine_id):
-    if request.method != "DELETE":
-        return Response(
-            {"detail": f"(Invalid method) only DELETE method is allowed here but provided with {request.method}"},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
-    
     auth_response = check_authentication(request)
     if auth_response:
         return auth_response
-    
+
     try:
         medicine = Medicines.objects.get(id=medicine_id, user=request.user)
     except Medicines.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Medicine not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     medicine.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

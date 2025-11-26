@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 # medcine model contains all the medicines
 
-
 def medicine_image_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/medicines/medicine_<id>/<filename>
     ext = filename.split(".")[-1]
@@ -24,35 +23,25 @@ class Medicines(models.Model):
     )
 
     name = models.CharField(max_length=255, help_text="Name of the medicine")
-    description = models.TextField(
-        blank=True, null=True, help_text="Description of the medicine"
+    
+    # amount indicates the number of units of medicine to be taken at a time (e.g., 2 tablets, 1 syrup spoon)
+    amount = models.IntegerField(
+        help_text="Number of units to be taken at a time (e.g., 2 tablets)"
     )
 
-    # dose of medicine like mg, ml, etc
-    dose = models.CharField(
-        max_length=50, help_text="Dose of the medicine (e.g., 500mg, 10ml)"
+    # dosage indicates the dosage of units of medicine to take (e.g., 500mg, 1ml)
+    dosage = models.IntegerField(
+        help_text="Dosage of the medicine (e.g., 500 for 500mg)"
     )
 
-    # does unit means the no of tablets or syrups or injections
-    dose_unit = models.CharField(
-        max_length=50, help_text="Unit of the dose (e.g., 5 , 10)"
+    # days a week the medicine is taken stored in an jsonb array of integers e.g [1,2,3,4,5,6,7] where 1=Sunday, 7=Saturday
+    days_of_week = models.JSONField(
+        help_text="Days of the week the medicine is taken (e.g., [1,2,3,4,5,6,7] for Sun-Sat)"
     )
 
-    # days a week the medicine is taken stored in an jsonb array of integers e.g [1,2,3] means monday, tuesday, wednesday
-    days_a_week = models.JSONField(
-        help_text="Days of the week the medicine is taken (e.g., [1,2,3] for Mon, Tue, Wed)"
-    )
-
-    # time of day when the medicine is taken stored in an jsonb array of strings e.g ["8:00", "12:00"] means 8:00 am, 12:00 pm etc in 24-hour format
-    time_of_day = models.JSONField(
-        help_text="Time of day when the medicine is taken (e.g., ['8:00', '12:00']) in 24-hour format"
-    )
-
-    # additional composition map if any or else can be blank
-    composition = models.JSONField(
-        blank=True,
-        null=True,
-        help_text="Additional composition details (e.g., {'paracetamol': '500mg', 'ingredient2': 'value2'})",
+    # time of day when the medicine is taken stored in an jsonb array of time strings e.g ["08:00", "14:00", "20:00"] in 24-hour format
+    time = models.JSONField(
+        help_text="Times of day when the medicine is taken (e.g., ['08:00', '14:00', '20:00']) in HH:MM format"
     )
 
     image = models.ImageField(
@@ -62,10 +51,30 @@ class Medicines(models.Model):
         help_text="Image of the medicine if any or else can be blank",
     )
 
+    # help_message is an extra note set by the user for the user itself to remember
+    help_message = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Extra note for the user to remember about this medicine"
+    )
+
+    # start_date indicates when the medicine schedule starts
+    start_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Start date of the medicine schedule"
+    )
+
+    # end_date indicates when the medicine schedule ends
+    end_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="End date of the medicine schedule"
+    )
+
+
     def __str__(self):
-        return (
-            f"{self.name} ({self.dose} x {self.dose_unit}) for User {self.user.email}"
-        )
+        return f"{self.name} ({self.amount} units x {self.dosage}mg) for User {self.user.email}"
 
     class Meta:
         ordering = ["id"]
@@ -77,10 +86,45 @@ class Medicines(models.Model):
 
 
 class MedicineSerializer(serializers.ModelSerializer):
+    # Make image_url return the full URL instead of just the path
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Medicines
-        fields = "__all__"
-        read_only_fields = ["user"]
+        fields = [
+            "id",
+            "name",
+            "amount",
+            "dosage",
+            "time",
+            "days_of_week",
+            "image_url",
+            "help_message",
+            "start_date",
+            "end_date",
+        ]
+        read_only_fields = ["user", "id"]
+
+    def get_image_url(self, obj):
+        """Return the full URL for the image if it exists"""
+        if obj.image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+    def to_representation(self, instance):
+        """Customize the output format"""
+        representation = super().to_representation(instance)
+        # Ensure time and days_of_week are lists (not dicts)
+        if representation.get('time'):
+            representation['time'] = list(representation['time'])
+        if representation.get('days_of_week'):
+            representation['days_of_week'] = list(representation['days_of_week'])
+        return representation
+
+
 
 
 # Intakes model contains all the intakes

@@ -4,6 +4,7 @@ import sys
 import django
 from datetime import datetime
 
+
 def small_ping(request):
     return JsonResponse({})
 
