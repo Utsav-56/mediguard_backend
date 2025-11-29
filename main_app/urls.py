@@ -36,6 +36,8 @@ urlpatterns = [
 
     path("intake/", include("intake.urls")),
 
+    path("health/", include("health_state.urls")),
+
     path("", include("ping.urls")),  # Default to ping app
 ]
 

@@ -38,23 +38,29 @@ All endpoints require **JWT Authentication**.
 All responses are automatically wrapped by `ResponseWrapperMiddleware`:
 
 ### Success Response Structure
+
 ```json
 {
-    "success": true,
-    "response": { /* actual data */ },
-    "error": null
+	"success": true,
+	"response": {
+		/* actual data */
+	},
+	"error": null
 }
 ```
 
 ### Error Response Structure
+
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "Error description",
-        "details": { /* additional error info */ }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Error description",
+		"details": {
+			/* additional error info */
+		}
+	}
 }
 ```
 
@@ -62,20 +68,20 @@ All responses are automatically wrapped by `ResponseWrapperMiddleware`:
 
 ## Endpoints Summary
 
-| Method | Endpoint                     | Description                              |
-| ------ | ---------------------------- | ---------------------------------------- |
-| GET    | `/intake/list/`              | List all intakes with optional filters   |
-| POST   | `/intake/list/`              | Create a new intake record               |
-| GET    | `/intake/today/`             | Get all intakes scheduled for today      |
-| GET    | `/intake/medicine/<id>/`     | Get all intakes for a specific medicine  |
-| POST   | `/intake/mark-taken/<id>/`   | Quick action: mark intake as taken       |
-| POST   | `/intake/mark-skipped/<id>/` | Quick action: mark intake as skipped     |
-| POST   | `/intake/generate/`          | Bulk generate intake records for dates   |
-| GET    | `/intake/stats/`             | Get adherence statistics                 |
-| GET    | `/intake/<id>/`              | Get a specific intake record             |
-| PUT    | `/intake/<id>/`              | Full update an intake record             |
-| PATCH  | `/intake/<id>/`              | Partial update an intake record          |
-| DELETE | `/intake/<id>/`              | Delete an intake record                  |
+| Method | Endpoint                     | Description                             |
+| ------ | ---------------------------- | --------------------------------------- |
+| GET    | `/intake/list/`              | List all intakes with optional filters  |
+| POST   | `/intake/list/`              | Create a new intake record              |
+| GET    | `/intake/today/`             | Get all intakes scheduled for today     |
+| GET    | `/intake/medicine/<id>/`     | Get all intakes for a specific medicine |
+| POST   | `/intake/mark-taken/<id>/`   | Quick action: mark intake as taken      |
+| POST   | `/intake/mark-skipped/<id>/` | Quick action: mark intake as skipped    |
+| POST   | `/intake/generate/`          | Bulk generate intake records for dates  |
+| GET    | `/intake/stats/`             | Get adherence statistics                |
+| GET    | `/intake/<id>/`              | Get a specific intake record            |
+| PUT    | `/intake/<id>/`              | Full update an intake record            |
+| PATCH  | `/intake/<id>/`              | Partial update an intake record         |
+| DELETE | `/intake/<id>/`              | Delete an intake record                 |
 
 ---
 
@@ -95,12 +101,12 @@ Retrieves all intake records for the authenticated user with optional filtering.
 
 #### Query Parameters
 
-| Parameter     | Type   | Required | Description                                        |
-| ------------- | ------ | -------- | -------------------------------------------------- |
-| `date`        | string | No       | Filter by specific date (format: `YYYY-MM-DD`)     |
-| `start_date`  | string | No       | Filter from date (format: `YYYY-MM-DD`)            |
-| `end_date`    | string | No       | Filter to date (format: `YYYY-MM-DD`)              |
-| `medicine_id` | int    | No       | Filter by specific medicine ID                     |
+| Parameter     | Type   | Required | Description                                               |
+| ------------- | ------ | -------- | --------------------------------------------------------- |
+| `date`        | string | No       | Filter by specific date (format: `YYYY-MM-DD`)            |
+| `start_date`  | string | No       | Filter from date (format: `YYYY-MM-DD`)                   |
+| `end_date`    | string | No       | Filter to date (format: `YYYY-MM-DD`)                     |
+| `medicine_id` | int    | No       | Filter by specific medicine ID                            |
 | `status`      | string | No       | Filter by status: `pending`, `taken`, `skipped`, `missed` |
 
 #### Example Request
@@ -114,42 +120,42 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "success": true,
-    "response": [
-        {
-            "id": 1,
-            "medicine": 1,
-            "medicine_name": "Paracetamol",
-            "medicine_dosage": 500,
-            "medicine_amount": 2,
-            "scheduled_date": "2025-11-30",
-            "scheduled_time": "08:00:00",
-            "status": "pending",
-            "taken_at": null,
-            "notes": null,
-            "is_late": false,
-            "delay_minutes": 0,
-            "created_at": "2025-11-29T20:00:00Z",
-            "updated_at": "2025-11-29T20:00:00Z"
-        },
-        {
-            "id": 2,
-            "medicine": 1,
-            "medicine_name": "Paracetamol",
-            "medicine_dosage": 500,
-            "medicine_amount": 2,
-            "scheduled_date": "2025-11-30",
-            "scheduled_time": "20:00:00",
-            "status": "pending",
-            "taken_at": null,
-            "notes": null,
-            "is_late": false,
-            "delay_minutes": 0,
-            "created_at": "2025-11-29T20:00:00Z",
-            "updated_at": "2025-11-29T20:00:00Z"
-        }
-    ],
-    "error": null
+	"success": true,
+	"response": [
+		{
+			"id": 1,
+			"medicine": 1,
+			"medicine_name": "Paracetamol",
+			"medicine_dosage": 500,
+			"medicine_amount": 2,
+			"scheduled_date": "2025-11-30",
+			"scheduled_time": "08:00:00",
+			"status": "pending",
+			"taken_at": null,
+			"notes": null,
+			"is_late": false,
+			"delay_minutes": 0,
+			"created_at": "2025-11-29T20:00:00Z",
+			"updated_at": "2025-11-29T20:00:00Z"
+		},
+		{
+			"id": 2,
+			"medicine": 1,
+			"medicine_name": "Paracetamol",
+			"medicine_dosage": 500,
+			"medicine_amount": 2,
+			"scheduled_date": "2025-11-30",
+			"scheduled_time": "20:00:00",
+			"status": "pending",
+			"taken_at": null,
+			"notes": null,
+			"is_late": false,
+			"delay_minutes": 0,
+			"created_at": "2025-11-29T20:00:00Z",
+			"updated_at": "2025-11-29T20:00:00Z"
+		}
+	],
+	"error": null
 }
 ```
 
@@ -157,14 +163,14 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "Invalid date format. Use YYYY-MM-DD",
-        "details": {
-            "detail": "Invalid date format. Use YYYY-MM-DD"
-        }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Invalid date format. Use YYYY-MM-DD",
+		"details": {
+			"detail": "Invalid date format. Use YYYY-MM-DD"
+		}
+	}
 }
 ```
 
@@ -182,24 +188,24 @@ Create a new intake record manually.
 
 #### Request Body
 
-| Field            | Type   | Required | Description                                    |
-| ---------------- | ------ | -------- | ---------------------------------------------- |
-| `medicine`       | int    | Yes      | ID of the medicine                             |
-| `scheduled_date` | string | Yes      | Date for intake (format: `YYYY-MM-DD`)         |
-| `scheduled_time` | string | Yes      | Time for intake (format: `HH:MM`)              |
-| `status`         | string | No       | Status (default: `pending`)                    |
-| `taken_at`       | string | No       | Actual datetime taken (ISO 8601)               |
-| `notes`          | string | No       | Optional notes                                 |
+| Field            | Type   | Required | Description                            |
+| ---------------- | ------ | -------- | -------------------------------------- |
+| `medicine`       | int    | Yes      | ID of the medicine                     |
+| `scheduled_date` | string | Yes      | Date for intake (format: `YYYY-MM-DD`) |
+| `scheduled_time` | string | Yes      | Time for intake (format: `HH:MM`)      |
+| `status`         | string | No       | Status (default: `pending`)            |
+| `taken_at`       | string | No       | Actual datetime taken (ISO 8601)       |
+| `notes`          | string | No       | Optional notes                         |
 
 #### Example Request
 
 ```json
 {
-    "medicine": 1,
-    "scheduled_date": "2025-12-01",
-    "scheduled_time": "08:00",
-    "status": "pending",
-    "notes": "Take with food"
+	"medicine": 1,
+	"scheduled_date": "2025-12-01",
+	"scheduled_time": "08:00",
+	"status": "pending",
+	"notes": "Take with food"
 }
 ```
 
@@ -207,24 +213,24 @@ Create a new intake record manually.
 
 ```json
 {
-    "success": true,
-    "response": {
-        "id": 3,
-        "medicine": 1,
-        "medicine_name": "Paracetamol",
-        "medicine_dosage": 500,
-        "medicine_amount": 2,
-        "scheduled_date": "2025-12-01",
-        "scheduled_time": "08:00:00",
-        "status": "pending",
-        "taken_at": null,
-        "notes": "Take with food",
-        "is_late": false,
-        "delay_minutes": 0,
-        "created_at": "2025-11-30T10:00:00Z",
-        "updated_at": "2025-11-30T10:00:00Z"
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"id": 3,
+		"medicine": 1,
+		"medicine_name": "Paracetamol",
+		"medicine_dosage": 500,
+		"medicine_amount": 2,
+		"scheduled_date": "2025-12-01",
+		"scheduled_time": "08:00:00",
+		"status": "pending",
+		"taken_at": null,
+		"notes": "Take with food",
+		"is_late": false,
+		"delay_minutes": 0,
+		"created_at": "2025-11-30T10:00:00Z",
+		"updated_at": "2025-11-30T10:00:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -232,14 +238,14 @@ Create a new intake record manually.
 
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "You can only create intakes for your own medicines.",
-        "details": {
-            "medicine": ["You can only create intakes for your own medicines."]
-        }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "You can only create intakes for your own medicines.",
+		"details": {
+			"medicine": ["You can only create intakes for your own medicines."]
+		}
+	}
 }
 ```
 
@@ -266,42 +272,42 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "success": true,
-    "response": [
-        {
-            "id": 1,
-            "medicine": 1,
-            "medicine_name": "Paracetamol",
-            "medicine_dosage": 500,
-            "medicine_amount": 2,
-            "scheduled_date": "2025-11-30",
-            "scheduled_time": "08:00:00",
-            "status": "taken",
-            "taken_at": "2025-11-30T08:05:00Z",
-            "notes": "Taken with breakfast",
-            "is_late": true,
-            "delay_minutes": 5,
-            "created_at": "2025-11-29T20:00:00Z",
-            "updated_at": "2025-11-30T08:05:00Z"
-        },
-        {
-            "id": 2,
-            "medicine": 1,
-            "medicine_name": "Paracetamol",
-            "medicine_dosage": 500,
-            "medicine_amount": 2,
-            "scheduled_date": "2025-11-30",
-            "scheduled_time": "20:00:00",
-            "status": "pending",
-            "taken_at": null,
-            "notes": null,
-            "is_late": false,
-            "delay_minutes": 0,
-            "created_at": "2025-11-29T20:00:00Z",
-            "updated_at": "2025-11-29T20:00:00Z"
-        }
-    ],
-    "error": null
+	"success": true,
+	"response": [
+		{
+			"id": 1,
+			"medicine": 1,
+			"medicine_name": "Paracetamol",
+			"medicine_dosage": 500,
+			"medicine_amount": 2,
+			"scheduled_date": "2025-11-30",
+			"scheduled_time": "08:00:00",
+			"status": "taken",
+			"taken_at": "2025-11-30T08:05:00Z",
+			"notes": "Taken with breakfast",
+			"is_late": true,
+			"delay_minutes": 5,
+			"created_at": "2025-11-29T20:00:00Z",
+			"updated_at": "2025-11-30T08:05:00Z"
+		},
+		{
+			"id": 2,
+			"medicine": 1,
+			"medicine_name": "Paracetamol",
+			"medicine_dosage": 500,
+			"medicine_amount": 2,
+			"scheduled_date": "2025-11-30",
+			"scheduled_time": "20:00:00",
+			"status": "pending",
+			"taken_at": null,
+			"notes": null,
+			"is_late": false,
+			"delay_minutes": 0,
+			"created_at": "2025-11-29T20:00:00Z",
+			"updated_at": "2025-11-29T20:00:00Z"
+		}
+	],
+	"error": null
 }
 ```
 
@@ -311,11 +317,11 @@ Authorization: Bearer <token>
 
 Fetch all intake records for a specific medicine.
 
-| Property | Value                          |
-| -------- | ------------------------------ |
+| Property | Value                             |
+| -------- | --------------------------------- |
 | URL      | `/intake/medicine/<medicine_id>/` |
-| Method   | `GET`                          |
-| Auth     | Required (JWT)                 |
+| Method   | `GET`                             |
+| Auth     | Required (JWT)                    |
 
 #### URL Parameters
 
@@ -325,8 +331,8 @@ Fetch all intake records for a specific medicine.
 
 #### Query Parameters
 
-| Parameter    | Type   | Required | Description                           |
-| ------------ | ------ | -------- | ------------------------------------- |
+| Parameter    | Type   | Required | Description                             |
+| ------------ | ------ | -------- | --------------------------------------- |
 | `start_date` | string | No       | Filter from date (format: `YYYY-MM-DD`) |
 | `end_date`   | string | No       | Filter to date (format: `YYYY-MM-DD`)   |
 
@@ -361,14 +367,14 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "Medicine not found",
-        "details": {
-            "detail": "Medicine not found"
-        }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Medicine not found",
+		"details": {
+			"detail": "Medicine not found"
+		}
+	}
 }
 ```
 
@@ -378,29 +384,29 @@ Authorization: Bearer <token>
 
 Quick action to mark an intake as taken with the current timestamp.
 
-| Property | Value                       |
-| -------- | --------------------------- |
-| URL      | `/intake/mark-taken/<id>/`  |
-| Method   | `POST`                      |
-| Auth     | Required (JWT)              |
+| Property | Value                      |
+| -------- | -------------------------- |
+| URL      | `/intake/mark-taken/<id>/` |
+| Method   | `POST`                     |
+| Auth     | Required (JWT)             |
 
 #### URL Parameters
 
-| Parameter | Type | Description       |
-| --------- | ---- | ----------------- |
-| `id`      | int  | ID of the intake  |
+| Parameter | Type | Description      |
+| --------- | ---- | ---------------- |
+| `id`      | int  | ID of the intake |
 
 #### Request Body (Optional)
 
-| Field   | Type   | Required | Description                    |
-| ------- | ------ | -------- | ------------------------------ |
+| Field   | Type   | Required | Description                     |
+| ------- | ------ | -------- | ------------------------------- |
 | `notes` | string | No       | Optional notes about the intake |
 
 #### Example Request
 
 ```json
 {
-    "notes": "Taken with breakfast"
+	"notes": "Taken with breakfast"
 }
 ```
 
@@ -408,24 +414,24 @@ Quick action to mark an intake as taken with the current timestamp.
 
 ```json
 {
-    "success": true,
-    "response": {
-        "id": 1,
-        "medicine": 1,
-        "medicine_name": "Paracetamol",
-        "medicine_dosage": 500,
-        "medicine_amount": 2,
-        "scheduled_date": "2025-11-30",
-        "scheduled_time": "08:00:00",
-        "status": "taken",
-        "taken_at": "2025-11-30T08:15:30Z",
-        "notes": "Taken with breakfast",
-        "is_late": true,
-        "delay_minutes": 15,
-        "created_at": "2025-11-29T20:00:00Z",
-        "updated_at": "2025-11-30T08:15:30Z"
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"id": 1,
+		"medicine": 1,
+		"medicine_name": "Paracetamol",
+		"medicine_dosage": 500,
+		"medicine_amount": 2,
+		"scheduled_date": "2025-11-30",
+		"scheduled_time": "08:00:00",
+		"status": "taken",
+		"taken_at": "2025-11-30T08:15:30Z",
+		"notes": "Taken with breakfast",
+		"is_late": true,
+		"delay_minutes": 15,
+		"created_at": "2025-11-29T20:00:00Z",
+		"updated_at": "2025-11-30T08:15:30Z"
+	},
+	"error": null
 }
 ```
 
@@ -435,29 +441,29 @@ Quick action to mark an intake as taken with the current timestamp.
 
 Quick action to mark an intake as skipped.
 
-| Property | Value                         |
-| -------- | ----------------------------- |
-| URL      | `/intake/mark-skipped/<id>/`  |
-| Method   | `POST`                        |
-| Auth     | Required (JWT)                |
+| Property | Value                        |
+| -------- | ---------------------------- |
+| URL      | `/intake/mark-skipped/<id>/` |
+| Method   | `POST`                       |
+| Auth     | Required (JWT)               |
 
 #### URL Parameters
 
-| Parameter | Type | Description       |
-| --------- | ---- | ----------------- |
-| `id`      | int  | ID of the intake  |
+| Parameter | Type | Description      |
+| --------- | ---- | ---------------- |
+| `id`      | int  | ID of the intake |
 
 #### Request Body (Optional)
 
-| Field   | Type   | Required | Description                         |
-| ------- | ------ | -------- | ----------------------------------- |
-| `notes` | string | No       | Reason for skipping (recommended)   |
+| Field   | Type   | Required | Description                       |
+| ------- | ------ | -------- | --------------------------------- |
+| `notes` | string | No       | Reason for skipping (recommended) |
 
 #### Example Request
 
 ```json
 {
-    "notes": "Feeling nauseous, doctor advised to skip"
+	"notes": "Feeling nauseous, doctor advised to skip"
 }
 ```
 
@@ -497,10 +503,10 @@ Generate intake records for a date range based on medicine schedules. This is us
 
 #### Request Body
 
-| Field          | Type       | Required | Description                                              |
-| -------------- | ---------- | -------- | -------------------------------------------------------- |
-| `start_date`   | string     | Yes      | Start date (format: `YYYY-MM-DD`)                        |
-| `end_date`     | string     | Yes      | End date (format: `YYYY-MM-DD`)                          |
+| Field          | Type       | Required | Description                                                 |
+| -------------- | ---------- | -------- | ----------------------------------------------------------- |
+| `start_date`   | string     | Yes      | Start date (format: `YYYY-MM-DD`)                           |
+| `end_date`     | string     | Yes      | End date (format: `YYYY-MM-DD`)                             |
 | `medicine_ids` | array[int] | No       | List of medicine IDs. If empty, generates for all medicines |
 
 #### Validation Rules
@@ -515,9 +521,9 @@ Generate intake records for a date range based on medicine schedules. This is us
 
 ```json
 {
-    "start_date": "2025-12-01",
-    "end_date": "2025-12-07",
-    "medicine_ids": [1, 2]
+	"start_date": "2025-12-01",
+	"end_date": "2025-12-07",
+	"medicine_ids": [1, 2]
 }
 ```
 
@@ -525,13 +531,13 @@ Generate intake records for a date range based on medicine schedules. This is us
 
 ```json
 {
-    "success": true,
-    "response": {
-        "detail": "Intakes generated successfully",
-        "created": 14,
-        "skipped_existing": 2
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"detail": "Intakes generated successfully",
+		"created": 14,
+		"skipped_existing": 2
+	},
+	"error": null
 }
 ```
 
@@ -539,14 +545,14 @@ Generate intake records for a date range based on medicine schedules. This is us
 
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "Date range cannot exceed 30 days",
-        "details": {
-            "non_field_errors": ["Date range cannot exceed 30 days"]
-        }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Date range cannot exceed 30 days",
+		"details": {
+			"non_field_errors": ["Date range cannot exceed 30 days"]
+		}
+	}
 }
 ```
 
@@ -564,11 +570,11 @@ Get adherence statistics for the user's medication intake.
 
 #### Query Parameters
 
-| Parameter     | Type   | Required | Description                              |
-| ------------- | ------ | -------- | ---------------------------------------- |
-| `start_date`  | string | No       | Filter from date (format: `YYYY-MM-DD`)  |
-| `end_date`    | string | No       | Filter to date (format: `YYYY-MM-DD`)    |
-| `medicine_id` | int    | No       | Filter by specific medicine ID           |
+| Parameter     | Type   | Required | Description                             |
+| ------------- | ------ | -------- | --------------------------------------- |
+| `start_date`  | string | No       | Filter from date (format: `YYYY-MM-DD`) |
+| `end_date`    | string | No       | Filter to date (format: `YYYY-MM-DD`)   |
+| `medicine_id` | int    | No       | Filter by specific medicine ID          |
 
 #### Example Request
 
@@ -581,33 +587,33 @@ Authorization: Bearer <token>
 
 ```json
 {
-    "success": true,
-    "response": {
-        "total_intakes": 60,
-        "taken_count": 50,
-        "missed_count": 5,
-        "skipped_count": 3,
-        "pending_count": 2,
-        "adherence_rate": 86.21,
-        "on_time_count": 45,
-        "late_count": 5
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"total_intakes": 60,
+		"taken_count": 50,
+		"missed_count": 5,
+		"skipped_count": 3,
+		"pending_count": 2,
+		"adherence_rate": 86.21,
+		"on_time_count": 45,
+		"late_count": 5
+	},
+	"error": null
 }
 ```
 
 #### Statistics Explanation
 
-| Field            | Type  | Description                                                    |
-| ---------------- | ----- | -------------------------------------------------------------- |
-| `total_intakes`  | int   | Total number of intake records                                 |
-| `taken_count`    | int   | Number of intakes marked as "taken"                            |
-| `missed_count`   | int   | Number of intakes marked as "missed"                           |
-| `skipped_count`  | int   | Number of intakes marked as "skipped"                          |
-| `pending_count`  | int   | Number of intakes still "pending"                              |
-| `adherence_rate` | float | Percentage: `(taken / (total - pending)) * 100`                |
-| `on_time_count`  | int   | Number of taken intakes that were on time                      |
-| `late_count`     | int   | Number of taken intakes that were late                         |
+| Field            | Type  | Description                                     |
+| ---------------- | ----- | ----------------------------------------------- |
+| `total_intakes`  | int   | Total number of intake records                  |
+| `taken_count`    | int   | Number of intakes marked as "taken"             |
+| `missed_count`   | int   | Number of intakes marked as "missed"            |
+| `skipped_count`  | int   | Number of intakes marked as "skipped"           |
+| `pending_count`  | int   | Number of intakes still "pending"               |
+| `adherence_rate` | float | Percentage: `(taken / (total - pending)) * 100` |
+| `on_time_count`  | int   | Number of taken intakes that were on time       |
+| `late_count`     | int   | Number of taken intakes that were late          |
 
 ---
 
@@ -615,40 +621,40 @@ Authorization: Bearer <token>
 
 Retrieve a single intake record by ID.
 
-| Property | Value            |
-| -------- | ---------------- |
-| URL      | `/intake/<id>/`  |
-| Method   | `GET`            |
-| Auth     | Required (JWT)   |
+| Property | Value           |
+| -------- | --------------- |
+| URL      | `/intake/<id>/` |
+| Method   | `GET`           |
+| Auth     | Required (JWT)  |
 
 #### URL Parameters
 
-| Parameter | Type | Description       |
-| --------- | ---- | ----------------- |
-| `id`      | int  | ID of the intake  |
+| Parameter | Type | Description      |
+| --------- | ---- | ---------------- |
+| `id`      | int  | ID of the intake |
 
 #### Success Response (200 OK)
 
 ```json
 {
-    "success": true,
-    "response": {
-        "id": 1,
-        "medicine": 1,
-        "medicine_name": "Paracetamol",
-        "medicine_dosage": 500,
-        "medicine_amount": 2,
-        "scheduled_date": "2025-11-30",
-        "scheduled_time": "08:00:00",
-        "status": "taken",
-        "taken_at": "2025-11-30T08:05:00Z",
-        "notes": "Taken with breakfast",
-        "is_late": true,
-        "delay_minutes": 5,
-        "created_at": "2025-11-29T20:00:00Z",
-        "updated_at": "2025-11-30T08:05:00Z"
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"id": 1,
+		"medicine": 1,
+		"medicine_name": "Paracetamol",
+		"medicine_dosage": 500,
+		"medicine_amount": 2,
+		"scheduled_date": "2025-11-30",
+		"scheduled_time": "08:00:00",
+		"status": "taken",
+		"taken_at": "2025-11-30T08:05:00Z",
+		"notes": "Taken with breakfast",
+		"is_late": true,
+		"delay_minutes": 5,
+		"created_at": "2025-11-29T20:00:00Z",
+		"updated_at": "2025-11-30T08:05:00Z"
+	},
+	"error": null
 }
 ```
 
@@ -656,14 +662,14 @@ Retrieve a single intake record by ID.
 
 ```json
 {
-    "success": false,
-    "response": null,
-    "error": {
-        "message": "Intake not found",
-        "details": {
-            "detail": "Intake not found"
-        }
-    }
+	"success": false,
+	"response": null,
+	"error": {
+		"message": "Intake not found",
+		"details": {
+			"detail": "Intake not found"
+		}
+	}
 }
 ```
 
@@ -681,18 +687,18 @@ Full update of an intake record.
 
 #### Request Body
 
-| Field      | Type   | Required | Description                                        |
-| ---------- | ------ | -------- | -------------------------------------------------- |
-| `status`   | string | Yes      | Status: `pending`, `taken`, `skipped`, `missed`    |
-| `taken_at` | string | No       | Actual datetime taken (auto-set if status=taken)   |
-| `notes`    | string | No       | Optional notes                                     |
+| Field      | Type   | Required | Description                                      |
+| ---------- | ------ | -------- | ------------------------------------------------ |
+| `status`   | string | Yes      | Status: `pending`, `taken`, `skipped`, `missed`  |
+| `taken_at` | string | No       | Actual datetime taken (auto-set if status=taken) |
+| `notes`    | string | No       | Optional notes                                   |
 
 #### Example Request
 
 ```json
 {
-    "status": "taken",
-    "notes": "Taken 15 minutes late"
+	"status": "taken",
+	"notes": "Taken 15 minutes late"
 }
 ```
 
@@ -732,7 +738,7 @@ Only include fields you want to update:
 
 ```json
 {
-    "notes": "Added a note"
+	"notes": "Added a note"
 }
 ```
 
@@ -756,11 +762,11 @@ Delete an intake record.
 
 ```json
 {
-    "success": true,
-    "response": {
-        "detail": "Intake deleted successfully"
-    },
-    "error": null
+	"success": true,
+	"response": {
+		"detail": "Intake deleted successfully"
+	},
+	"error": null
 }
 ```
 
@@ -770,39 +776,39 @@ Delete an intake record.
 
 ### Intake Model Fields
 
-| Field            | Type       | Description                                             |
-| ---------------- | ---------- | ------------------------------------------------------- |
-| `id`             | int        | Unique identifier (auto-generated)                      |
-| `user`           | FK         | Reference to User (auto-set from JWT)                   |
-| `medicine`       | FK         | Reference to Medicine                                   |
-| `scheduled_date` | date       | Date when medicine is scheduled                         |
-| `scheduled_time` | time       | Time when medicine is scheduled (HH:MM:SS)              |
-| `status`         | string     | `pending` / `taken` / `skipped` / `missed`              |
-| `taken_at`       | datetime   | Actual datetime when taken (null if not taken)          |
-| `notes`          | text       | Optional user notes                                     |
-| `created_at`     | datetime   | Record creation timestamp                               |
-| `updated_at`     | datetime   | Last update timestamp                                   |
+| Field            | Type     | Description                                    |
+| ---------------- | -------- | ---------------------------------------------- |
+| `id`             | int      | Unique identifier (auto-generated)             |
+| `user`           | FK       | Reference to User (auto-set from JWT)          |
+| `medicine`       | FK       | Reference to Medicine                          |
+| `scheduled_date` | date     | Date when medicine is scheduled                |
+| `scheduled_time` | time     | Time when medicine is scheduled (HH:MM:SS)     |
+| `status`         | string   | `pending` / `taken` / `skipped` / `missed`     |
+| `taken_at`       | datetime | Actual datetime when taken (null if not taken) |
+| `notes`          | text     | Optional user notes                            |
+| `created_at`     | datetime | Record creation timestamp                      |
+| `updated_at`     | datetime | Last update timestamp                          |
 
 ### Computed Fields (Read-Only)
 
-| Field             | Type    | Description                                      |
-| ----------------- | ------- | ------------------------------------------------ |
-| `medicine_name`   | string  | Name of the associated medicine                  |
-| `medicine_dosage` | int     | Dosage of the medicine (e.g., 500 for 500mg)     |
-| `medicine_amount` | int     | Amount/units to take (e.g., 2 tablets)           |
-| `is_late`         | boolean | Whether medicine was taken after scheduled time  |
-| `delay_minutes`   | int     | Minutes late (0 if on time or not taken)         |
+| Field             | Type    | Description                                     |
+| ----------------- | ------- | ----------------------------------------------- |
+| `medicine_name`   | string  | Name of the associated medicine                 |
+| `medicine_dosage` | int     | Dosage of the medicine (e.g., 500 for 500mg)    |
+| `medicine_amount` | int     | Amount/units to take (e.g., 2 tablets)          |
+| `is_late`         | boolean | Whether medicine was taken after scheduled time |
+| `delay_minutes`   | int     | Minutes late (0 if on time or not taken)        |
 
 ---
 
 ## Status Values
 
-| Status    | Description                                         | `taken_at`   |
-| --------- | --------------------------------------------------- | ------------ |
-| `pending` | Scheduled but not yet time for intake               | `null`       |
-| `taken`   | User confirmed they took the medicine               | Auto-set     |
-| `skipped` | User intentionally skipped this dose                | `null`       |
-| `missed`  | Time passed without taking (system/user marked)     | `null`       |
+| Status    | Description                                     | `taken_at` |
+| --------- | ----------------------------------------------- | ---------- |
+| `pending` | Scheduled but not yet time for intake           | `null`     |
+| `taken`   | User confirmed they took the medicine           | Auto-set   |
+| `skipped` | User intentionally skipped this dose            | `null`     |
+| `missed`  | Time passed without taking (system/user marked) | `null`     |
 
 ---
 
@@ -843,26 +849,28 @@ GET /intake/stats/?start_date=2025-11-24&end_date=2025-11-30
 
 ## Error Codes Summary
 
-| HTTP Code | Meaning               | When It Occurs                          |
-| --------- | --------------------- | --------------------------------------- |
-| `200`     | OK                    | Successful GET, PUT, PATCH, DELETE      |
-| `201`     | Created               | Successful POST                         |
-| `400`     | Bad Request           | Invalid data or validation error        |
-| `401`     | Unauthorized          | Missing or invalid JWT token            |
-| `404`     | Not Found             | Intake or medicine not found            |
-| `500`     | Internal Server Error | Unexpected server error                 |
+| HTTP Code | Meaning               | When It Occurs                     |
+| --------- | --------------------- | ---------------------------------- |
+| `200`     | OK                    | Successful GET, PUT, PATCH, DELETE |
+| `201`     | Created               | Successful POST                    |
+| `400`     | Bad Request           | Invalid data or validation error   |
+| `401`     | Unauthorized          | Missing or invalid JWT token       |
+| `404`     | Not Found             | Intake or medicine not found       |
+| `500`     | Internal Server Error | Unexpected server error            |
 
 ---
 
 ## cURL Examples
 
 ### Get Today's Intakes
+
 ```bash
 curl -X GET "http://localhost:8000/intake/today/" \
   -H "Authorization: Bearer <token>"
 ```
 
 ### Mark as Taken
+
 ```bash
 curl -X POST "http://localhost:8000/intake/mark-taken/1/" \
   -H "Authorization: Bearer <token>" \
@@ -871,6 +879,7 @@ curl -X POST "http://localhost:8000/intake/mark-taken/1/" \
 ```
 
 ### Generate Weekly Intakes
+
 ```bash
 curl -X POST "http://localhost:8000/intake/generate/" \
   -H "Authorization: Bearer <token>" \
@@ -879,12 +888,14 @@ curl -X POST "http://localhost:8000/intake/generate/" \
 ```
 
 ### Get Statistics
+
 ```bash
 curl -X GET "http://localhost:8000/intake/stats/?start_date=2025-11-01&end_date=2025-11-30" \
   -H "Authorization: Bearer <token>"
 ```
 
 ### List with Filters
+
 ```bash
 curl -X GET "http://localhost:8000/intake/list/?status=pending&medicine_id=1" \
   -H "Authorization: Bearer <token>"
@@ -914,11 +925,11 @@ intake/
 
 ## Related Apps
 
-| App          | Base URL       | Description                              |
-| ------------ | -------------- | ---------------------------------------- |
-| Medicines    | `/medicine/`   | Manage medicines (source of schedules)   |
-| Alarm        | `/alarm/`      | View medicine alarm schedules            |
-| Accounts     | `/auth/`       | User authentication (JWT)                |
+| App       | Base URL     | Description                            |
+| --------- | ------------ | -------------------------------------- |
+| Medicines | `/medicine/` | Manage medicines (source of schedules) |
+| Alarm     | `/alarm/`    | View medicine alarm schedules          |
+| Accounts  | `/auth/`     | User authentication (JWT)              |
 
 ---
 

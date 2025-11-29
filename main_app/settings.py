@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "medicines",
     "alarm",
     "intake",
+    "health_state",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
