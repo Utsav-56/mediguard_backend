@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "image_processer",
     "ping",
     "medicines",
+    "alarm",
 ]
 
 AUTH_USER_MODEL = "accounts.User"

@@ -31,6 +31,10 @@ urlpatterns = [
     path("upload/", include("image_processer.urls")),
     path("server/", include("ping.urls")),
     path("medicine/", include("medicines.urls")),
+
+    path("alarm/", include("alarm.urls")),
+
+
     path("", include("ping.urls")),  # Default to ping app
 ]
 

@@ -10,6 +10,16 @@ def medicine_image_path(instance, filename):
     return f"medicines/medicine_{instance.id}.{ext}"
 
 
+def get_default_days_of_week():
+    """Default function for days_of_week field"""
+    return [1, 2, 3, 4, 5, 6, 7]
+
+
+def get_default_time():
+    """Default function for time field"""
+    return ["20:00"]
+
+
 class Medicines(models.Model):
     # id will be primary key we using postgreSQl so it should be auto incrementing serial
     id = models.AutoField(primary_key=True, help_text="Unique ID for the medicine")
@@ -26,22 +36,30 @@ class Medicines(models.Model):
     
     # amount indicates the number of units of medicine to be taken at a time (e.g., 2 tablets, 1 syrup spoon)
     amount = models.IntegerField(
-        help_text="Number of units to be taken at a time (e.g., 2 tablets)"
+        help_text="Number of units to be taken at a time (e.g., 2 tablets)",
+        default=1,
     )
 
     # dosage indicates the dosage of units of medicine to take (e.g., 500mg, 1ml)
     dosage = models.IntegerField(
-        help_text="Dosage of the medicine (e.g., 500 for 500mg)"
+        help_text="Dosage of the medicine (e.g., 500 for 500mg)",
+        null=True,
+        blank=True,
+
     )
 
     # days a week the medicine is taken stored in an jsonb array of integers e.g [1,2,3,4,5,6,7] where 1=Sunday, 7=Saturday
+    # defaults to all days [1,2,3,4,5,6,7]
     days_of_week = models.JSONField(
-        help_text="Days of the week the medicine is taken (e.g., [1,2,3,4,5,6,7] for Sun-Sat)"
+        help_text="Days of the week the medicine is taken (e.g., [1,2,3,4,5,6,7] for Sun-Sat)",
+        default=get_default_days_of_week,
     )
 
     # time of day when the medicine is taken stored in an jsonb array of time strings e.g ["08:00", "14:00", "20:00"] in 24-hour format
+    # defaults to ["20:00"]
     time = models.JSONField(
-        help_text="Times of day when the medicine is taken (e.g., ['08:00', '14:00', '20:00']) in HH:MM format"
+        help_text="Times of day when the medicine is taken (e.g., ['08:00', '14:00', '20:00']) in HH:MM format",
+        default=get_default_time,
     )
 
     image = models.ImageField(
@@ -72,7 +90,6 @@ class Medicines(models.Model):
         help_text="End date of the medicine schedule"
     )
 
-
     def __str__(self):
         return f"{self.name} ({self.amount} units x {self.dosage}mg) for User {self.user.email}"
 
@@ -80,9 +97,6 @@ class Medicines(models.Model):
         ordering = ["id"]
         verbose_name = "Medicine"
         verbose_name_plural = "Medicines"
-
-
-# serialisers for medicines
 
 
 class MedicineSerializer(serializers.ModelSerializer):
