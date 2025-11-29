@@ -34,6 +34,7 @@ urlpatterns = [
 
     path("alarm/", include("alarm.urls")),
 
+    path("intake/", include("intake.urls")),
 
     path("", include("ping.urls")),  # Default to ping app
 ]
