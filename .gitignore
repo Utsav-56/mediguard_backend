@@ -20,6 +20,10 @@ identifier.sqlite
 
 *.sqlite3
 
+# all md file except README.md
+*.md
+!README.md
+
 run.ps1
 z_logs/*
 

@@ -22,7 +22,7 @@ the following are the main API endpoints provided by the Accounts app, along wit
 3. `POST /auth/jwt/refresh/` - Token Refresh
 4. `POST /auth/jwt/verify/` - Token Verification
 5. `GET /auth/users/me/` - Get Current User Profile
-6. `PUT /auth/users/me/` or `PATCH /auth/users/me/` - Update Current User Profile
+6. `PUT /auth/users/me/` or `PATCH /auth/users/me/` - Update Current User Profile 
 
 ---
 

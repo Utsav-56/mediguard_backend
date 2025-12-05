@@ -1,0 +1,234 @@
+{
+  "diagramType": 1,
+  "data": {
+    "nodes": [
+      {
+        "id": "user-entity",
+        "type": "Entity",
+        "position": { "x": 600, "y": 100 },
+        "data": { "label": "accounts_user", "type": "Regular" },
+        "measured": { "width": 120, "height": 50 }
+      },
+      {
+        "id": "medicines-entity",
+        "type": "Entity",
+        "position": { "x": 600, "y": 400 },
+        "data": { "label": "medicines_medicines", "type": "Weak" },
+        "measured": { "width": 150, "height": 50 }
+      },
+      {
+        "id": "intake-entity",
+        "type": "Entity",
+        "position": { "x": 600, "y": 700 },
+        "data": { "label": "intake_intake", "type": "Weak" },
+        "measured": { "width": 120, "height": 50 }
+      },
+      {
+        "id": "template-entity",
+        "type": "Entity",
+        "position": { "x": 100, "y": 400 },
+        "data": { "label": "health_state_healthtemplate", "type": "Regular" },
+        "measured": { "width": 200, "height": 50 }
+      },
+      {
+        "id": "record-entity",
+        "type": "Entity",
+        "position": { "x": 250, "y": 100 },
+        "data": { "label": "health_state_healthrecord", "type": "Weak" },
+        "measured": { "width": 180, "height": 50 }
+      },
+      {
+        "id": "user-id-attr",
+        "parentId": "user-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": -60 },
+        "data": { "label": "id", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "user-email-attr",
+        "parentId": "user-entity",
+        "type": "Attribute",
+        "position": { "x": -130, "y": 0 },
+        "data": { "label": "email", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "user-name-attr",
+        "parentId": "user-entity",
+        "type": "Attribute",
+        "position": { "x": 130, "y": 0 },
+        "data": { "label": "full_name", "types": [] },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "medicine-id-attr",
+        "parentId": "medicines-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": -60 },
+        "data": { "label": "id", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "medicine-userid-attr",
+        "parentId": "medicines-entity",
+        "type": "Attribute",
+        "position": { "x": -150, "y": 0 },
+        "data": { "label": "user_id", "types": { "Derived": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "medicine-name-attr",
+        "parentId": "medicines-entity",
+        "type": "Attribute",
+        "position": { "x": 150, "y": 0 },
+        "data": { "label": "name", "types": [] },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "intake-id-attr",
+        "parentId": "intake-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": -60 },
+        "data": { "label": "id", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "intake-userid-attr",
+        "parentId": "intake-entity",
+        "type": "Attribute",
+        "position": { "x": -130, "y": -20 },
+        "data": { "label": "user_id", "types": { "Derived": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "intake-medicineid-attr",
+        "parentId": "intake-entity",
+        "type": "Attribute",
+        "position": { "x": 130, "y": -20 },
+        "data": { "label": "medicine_id", "types": { "Derived": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "intake-status-attr",
+        "parentId": "intake-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": 60 },
+        "data": { "label": "status", "types": [] },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "template-id-attr",
+        "parentId": "template-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": -60 },
+        "data": { "label": "id", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "template-name-attr",
+        "parentId": "template-entity",
+        "type": "Attribute",
+        "position": { "x": -150, "y": 0 },
+        "data": { "label": "name", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "record-id-attr",
+        "parentId": "record-entity",
+        "type": "Attribute",
+        "position": { "x": 0, "y": -60 },
+        "data": { "label": "id", "types": { "Unique": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "record-userid-attr",
+        "parentId": "record-entity",
+        "type": "Attribute",
+        "position": { "x": -150, "y": 0 },
+        "data": { "label": "user_id", "types": { "Derived": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "record-templateid-attr",
+        "parentId": "record-entity",
+        "type": "Attribute",
+        "position": { "x": 150, "y": 0 },
+        "data": { "label": "template_id", "types": { "Derived": true } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "user-has-medicine-rel",
+        "type": "Relationship",
+        "position": { "x": 600, "y": 250 },
+        "data": { "label": "Has", "sourceEntityDetails": { "id": "user-entity" }, "targetEntityDetails": { "id": "medicines-entity" } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "medicine-has-intake-rel",
+        "type": "Relationship",
+        "position": { "x": 600, "y": 550 },
+        "data": { "label": "Scheduled For", "sourceEntityDetails": { "id": "medicines-entity" }, "targetEntityDetails": { "id": "intake-entity" } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "user-schedules-intake-rel",
+        "type": "Relationship",
+        "position": { "x": 400, "y": 550 },
+        "data": { "label": "Schedules", "sourceEntityDetails": { "id": "user-entity" }, "targetEntityDetails": { "id": "intake-entity" } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "user-keeps-record-rel",
+        "type": "Relationship",
+        "position": { "x": 425, "y": 100 },
+        "data": { "label": "Keeps", "sourceEntityDetails": { "id": "user-entity" }, "targetEntityDetails": { "id": "record-entity" } },
+        "measured": { "width": 100, "height": 50 }
+      },
+      {
+        "id": "template-defines-record-rel",
+        "type": "Relationship",
+        "position": { "x": 175, "y": 250 },
+        "data": { "label": "Defines", "sourceEntityDetails": { "id": "template-entity" }, "targetEntityDetails": { "id": "record-entity" } },
+        "measured": { "width": 100, "height": 50 }
+      }
+    ],
+    "edges": [
+      { "id": "e-u1", "type": "Attribute", "source": "user-entity", "target": "user-id-attr" },
+      { "id": "e-u2", "type": "Attribute", "source": "user-entity", "target": "user-email-attr" },
+      { "id": "e-u3", "type": "Attribute", "source": "user-entity", "target": "user-name-attr" },
+      { "id": "e-m1", "type": "Attribute", "source": "medicines-entity", "target": "medicine-id-attr" },
+      { "id": "e-m2", "type": "Attribute", "source": "medicines-entity", "target": "medicine-userid-attr" },
+      { "id": "e-m3", "type": "Attribute", "source": "medicines-entity", "target": "medicine-name-attr" },
+      { "id": "e-i1", "type": "Attribute", "source": "intake-entity", "target": "intake-id-attr" },
+      { "id": "e-i2", "type": "Attribute", "source": "intake-entity", "target": "intake-userid-attr" },
+      { "id": "e-i3", "type": "Attribute", "source": "intake-entity", "target": "intake-medicineid-attr" },
+      { "id": "e-i4", "type": "Attribute", "source": "intake-entity", "target": "intake-status-attr" },
+      { "id": "e-t1", "type": "Attribute", "source": "template-entity", "target": "template-id-attr" },
+      { "id": "e-t2", "type": "Attribute", "source": "template-entity", "target": "template-name-attr" },
+      { "id": "e-r1", "type": "Attribute", "source": "record-entity", "target": "record-id-attr" },
+      { "id": "e-r2", "type": "Attribute", "source": "record-entity", "target": "record-userid-attr" },
+      { "id": "e-r3", "type": "Attribute", "source": "record-entity", "target": "record-templateid-attr" },
+      { "id": "rel-e1s", "type": "Relationship", "source": "user-has-medicine-rel", "target": "user-entity" },
+      { "id": "rel-e1t", "type": "Relationship", "source": "user-has-medicine-rel", "target": "medicines-entity" },
+      { "id": "rel-e2s", "type": "Relationship", "source": "medicine-has-intake-rel", "target": "medicines-entity" },
+      { "id": "rel-e2t", "type": "Relationship", "source": "medicine-has-intake-rel", "target": "intake-entity" },
+      { "id": "rel-e3s", "type": "Relationship", "source": "user-schedules-intake-rel", "target": "user-entity" },
+      { "id": "rel-e3t", "type": "Relationship", "source": "user-schedules-intake-rel", "target": "intake-entity" },
+      { "id": "rel-e4s", "type": "Relationship", "source": "user-keeps-record-rel", "target": "user-entity" },
+      { "id": "rel-e4t", "type": "Relationship", "source": "user-keeps-record-rel", "target": "record-entity" },
+      { "id": "rel-e5s", "type": "Relationship", "source": "template-defines-record-rel", "target": "template-entity" },
+      { "id": "rel-e5t", "type": "Relationship", "source": "template-defines-record-rel", "target": "record-entity" }
+    ],
+    "viewport": { "x": -250, "y": -150, "zoom": 0.8 }
+  },
+  "name": "MediGuard ER Schema",
+  "folder": {
+    "name": "Diagrams",
+    "folderType": 1,
+    "depth": 0,
+    "id": 5758
+  },
+  "id": 4771,
+  "updatedAtTimestamp": 1756189962
+}
