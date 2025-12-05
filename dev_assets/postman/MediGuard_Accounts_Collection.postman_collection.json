@@ -1,0 +1,3662 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+		"name": "MediGuard - Complete API Collection",
+		"description": "Complete API collection for MediGuard backend with automated token management and SRE response architecture validation.\n\n**Features:**\n- Automatic token storage and refresh\n- SRE response wrapper validation\n- All Djoser JWT endpoints\n- Custom login endpoint\n- User registration and management\n- Health templates and records management\n- Medicine management with scheduling\n- Alarm system (derived from medicines)\n\n**Setup:**\n1. Import this collection\n2. Set the `base_url` variable (default: http://localhost:8000)\n3. Register a user or login to get started\n4. Tokens are automatically managed and sent with all authenticated requests\n\n**Apps Covered:**\n- Authentication & User Management\n- Health State (Templates & Records)\n- Medicines (CRUD with scheduling)\n- Alarms (Read-only, derived from medicines)\n\n**Response Format:**\nAll responses follow SRE architecture:\n```json\n{\n  \"success\": true/false,\n  \"response\": { ...data },\n  \"error\": null/{ \"message\": \"...\", \"details\": {...} }\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Check if registration was successful",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"User registered successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('id');",
+									"        pm.expect(jsonData.response).to.have.property('email');",
+									"        pm.expect(jsonData.response).to.have.property('full_name');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    ",
+									"    // Store user email for login",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"test_user_email\", jsonData.response.email);",
+									"} else {",
+									"    pm.test(\"Registration failed with proper error\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"        pm.expect(jsonData.error).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\",\n    \"password\": \"SecurePass123!\",\n    \"full_name\": \"Test User\",\n    \"phone_number\": \"+1234567890\",\n    \"address\": \"123 Test Street, Test City\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", ""]
+						},
+						"description": "Register a new user account.\n\n**Request Body:**\n- `email` (required): User's email address\n- `password` (required): User's password\n- `full_name` (required): User's full name\n- `phone_number` (optional): Phone number (7-13 digits)\n- `address` (optional): User's address\n- `profile_image` (optional): Profile image file"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Custom)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Check if login was successful",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Login successful\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('tokens');",
+									"        pm.expect(jsonData.response).to.have.property('user');",
+									"        pm.expect(jsonData.response.tokens).to.have.property('access');",
+									"        pm.expect(jsonData.response.tokens).to.have.property('refresh');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    ",
+									"    // Store tokens for subsequent requests",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.response.tokens.access);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.response.tokens.refresh);",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.response.user.id);",
+									"    ",
+									"    console.log(\"✅ Access token stored:\", jsonData.response.tokens.access.substring(0, 20) + \"...\");",
+									"    console.log(\"✅ Refresh token stored:\", jsonData.response.tokens.refresh.substring(0, 20) + \"...\");",
+									"} else {",
+									"    pm.test(\"Login failed with proper error\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"        pm.expect(jsonData.error).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\",\n    \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login", ""]
+						},
+						"description": "Custom login endpoint with detailed error responses.\n\n**Returns:**\n- User information\n- Access token\n- Refresh token\n\n**Errors:**\n- Email does not exist\n- Account is inactive\n- Invalid password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Standard JWT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Check if login was successful",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Login successful\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('access');",
+									"        pm.expect(jsonData.response).to.have.property('refresh');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    ",
+									"    // Store tokens for subsequent requests",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.response.access);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.response.refresh);",
+									"    ",
+									"    console.log(\"✅ Access token stored:\", jsonData.response.access.substring(0, 20) + \"...\");",
+									"    console.log(\"✅ Refresh token stored:\", jsonData.response.refresh.substring(0, 20) + \"...\");",
+									"} else {",
+									"    pm.test(\"Login failed with proper error\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\",\n    \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/jwt/create/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "jwt", "create", ""]
+						},
+						"description": "Standard Djoser JWT token creation endpoint.\n\n**Returns:**\n- Access token\n- Refresh token"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Check if token refresh was successful",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Token refreshed successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('access');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    ",
+									"    // Update access token with new one",
+									"    var jsonData = pm.response.json();",
+									"    var oldToken = pm.collectionVariables.get(\"access_token\");",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.response.access);",
+									"    ",
+									"    console.log(\"🔄 Access token refreshed\");",
+									"    console.log(\"   Old:\", oldToken ? oldToken.substring(0, 20) + \"...\" : \"none\");",
+									"    console.log(\"   New:\", jsonData.response.access.substring(0, 20) + \"...\");",
+									"    ",
+									"    // If refresh token is also returned, update it",
+									"    if (jsonData.response.refresh) {",
+									"        pm.collectionVariables.set(\"refresh_token\", jsonData.response.refresh);",
+									"        console.log(\"🔄 Refresh token also updated\");",
+									"    }",
+									"} else {",
+									"    pm.test(\"Token refresh failed with proper error\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"    console.log(\"❌ Token refresh failed - you may need to login again\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Check if refresh token exists",
+									"var refreshToken = pm.collectionVariables.get(\"refresh_token\");",
+									"if (!refreshToken) {",
+									"    console.log(\"⚠️  No refresh token found. Please login first.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/jwt/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "jwt", "refresh", ""]
+						},
+						"description": "Refresh the access token using the refresh token.\n\n**Automatic Token Management:**\nThis endpoint automatically updates the stored `access_token` variable with the new token."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Check if token is valid",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Token is valid\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    console.log(\"✅ Access token is valid\");",
+									"} else {",
+									"    pm.test(\"Token is invalid or expired\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"    console.log(\"❌ Access token is invalid or expired - consider refreshing\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{access_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/jwt/verify/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "jwt", "verify", ""]
+						},
+						"description": "Verify if the access token is still valid.\n\nReturns 200 if valid, 401 if invalid or expired."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints including registration, login, token refresh, and verification."
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate user data",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"User data retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('id');",
+									"        pm.expect(jsonData.response).to.have.property('email');",
+									"        pm.expect(jsonData.response).to.have.property('full_name');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"} else if (pm.response.code === 401) {",
+									"    pm.test(\"Unauthorized - token missing or invalid\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Get the current authenticated user's profile information.\n\n**Requires:** Valid access token in Authorization header."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate update success",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"User updated successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('id');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"} else {",
+									"    pm.test(\"Update failed with error\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"full_name\": \"Test User Updated\",\n    \"phone_number\": \"+1987654321\",\n    \"address\": \"456 Updated Street, New City\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Update the current user's profile information.\n\n**Note:** Email cannot be changed through this endpoint."
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate partial update success",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"User partially updated successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone_number\": \"+1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Partially update the current user's profile (only specified fields)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate deletion",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"User deleted successfully\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"    ",
+									"    // Clear tokens",
+									"    pm.collectionVariables.set(\"access_token\", \"\");",
+									"    pm.collectionVariables.set(\"refresh_token\", \"\");",
+									"    console.log(\"🗑️  User deleted, tokens cleared\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Delete the current user's account.\n\n**Requires:** Current password in request body."
+					},
+					"response": []
+				}
+			],
+			"description": "User profile management endpoints for the authenticated user."
+		},
+		{
+			"name": "Password Management",
+			"item": [
+				{
+					"name": "Change Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate password change",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Password changed successfully\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"    console.log(\"✅ Password changed successfully\");",
+									"} else {",
+									"    pm.test(\"Password change failed\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.false;",
+									"        pm.expect(jsonData.error).to.not.be.null;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"SecurePass123!\",\n    \"new_password\": \"NewSecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/set_password/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "set_password", ""]
+						},
+						"description": "Change the current user's password.\n\n**Requires:**\n- Valid access token\n- Current password\n- New password"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate reset request",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Password reset email sent\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"    console.log(\"📧 Password reset email sent (check your email)\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/reset_password/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "reset_password", ""]
+						},
+						"description": "Request a password reset email.\n\nAn email with reset instructions will be sent to the provided email address."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password Confirm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Validate reset confirmation",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Password reset confirmed\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"    console.log(\"✅ Password reset successful\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"<uid-from-email>\",\n    \"token\": \"<token-from-email>\",\n    \"new_password\": \"NewSecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/reset_password_confirm/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"auth",
+								"users",
+								"reset_password_confirm",
+								""
+							]
+						},
+						"description": "Confirm password reset with the token from email.\n\n**Requires:**\n- `uid`: User ID from email\n- `token`: Reset token from email\n- `new_password`: New password"
+					},
+					"response": []
+				}
+			],
+			"description": "Password change and reset endpoints."
+		},
+		{
+			"name": "Email Management",
+			"item": [
+				{
+					"name": "Reset Email Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Email reset request sent\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"new.email@mediguard.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/reset_email/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "reset_email", ""]
+						},
+						"description": "Request to change the user's email address.\n\nA confirmation email will be sent to the new address."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Email Confirm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Email changed successfully\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"<uid-from-email>\",\n    \"token\": \"<token-from-email>\",\n    \"email\": \"new.email@mediguard.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/reset_email_confirm/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "reset_email_confirm", ""]
+						},
+						"description": "Confirm email change with token from confirmation email."
+					},
+					"response": []
+				}
+			],
+			"description": "Email change and management endpoints."
+		},
+		{
+			"name": "Account Activation",
+			"item": [
+				{
+					"name": "Activate Account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Account activated successfully\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"    console.log(\"✅ Account activated\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"<uid-from-email>\",\n    \"token\": \"<token-from-email>\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/activation/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "activation", ""]
+						},
+						"description": "Activate a user account using the activation token from email.\n\n**Note:** Only needed if account activation is enabled in settings."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Activation Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 204 || pm.response.code === 200) {",
+									"    pm.test(\"Activation email resent\", function () {",
+									"        pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/resend_activation/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "resend_activation", ""]
+						},
+						"description": "Resend the account activation email."
+					},
+					"response": []
+				}
+			],
+			"description": "Account activation endpoints (if activation is enabled)."
+		},
+		{
+			"name": "Edge Cases & Error Testing",
+			"item": [
+				{
+					"name": "Login - Email Not Exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns error for non-existent email\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.error.message).to.include(\"Email does not exist\");",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"nonexistent@mediguard.com\",\n    \"password\": \"SomePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login", ""]
+						},
+						"description": "Test error handling for non-existent email."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Wrong Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns error for invalid password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.error.message).to.include(\"Invalid password\");",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\",\n    \"password\": \"WrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login", ""]
+						},
+						"description": "Test error handling for incorrect password."
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized - No Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns 401 without token\", function () {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Test authentication requirement - no token provided."
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized - Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns 401 with invalid token\", function () {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "invalid.token.here",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/users/me/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", "me", ""]
+						},
+						"description": "Test authentication with invalid token."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Duplicate Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns error for duplicate email\", function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.error).to.not.be.null;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test.user@mediguard.com\",\n    \"password\": \"SecurePass123!\",\n    \"full_name\": \"Duplicate User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", ""]
+						},
+						"description": "Test duplicate email registration error."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Invalid Phone Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Returns validation error for invalid phone\", function () {",
+									"    pm.expect(pm.response.code).to.equal(400);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"invalid.phone@mediguard.com\",\n    \"password\": \"SecurePass123!\",\n    \"full_name\": \"Invalid Phone User\",\n    \"phone_number\": \"invalid-phone\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/users/",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "users", ""]
+						},
+						"description": "Test phone number validation."
+					},
+					"response": []
+				}
+			],
+			"description": "Edge case testing for error handling and validation."
+		},
+		{
+			"name": "Health State - Templates",
+			"item": [
+				{
+					"name": "Get All Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE Response Architecture",
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Templates retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"        pm.expect(jsonData.error).to.be.null;",
+									"    });",
+									"    ",
+									"    // Store first template slug for later use",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.response && jsonData.response.length > 0) {",
+									"        pm.collectionVariables.set(\"template_slug\", jsonData.response[0].slug);",
+									"        pm.collectionVariables.set(\"template_id\", jsonData.response[0].id);",
+									"        console.log(\"✅ Stored template:\", jsonData.response[0].name, \"(\", jsonData.response[0].slug, \")\");",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/templates/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "templates", ""]
+						},
+						"description": "Get all available health templates.\n\n**Public endpoint** - No authentication required.\n\n**Query Parameters:**\n- `category`: Filter by category (optional)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Templates by Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Filtered templates retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/templates/?category=cardiovascular",
+							"host": ["{{base_url}}"],
+							"path": ["health", "templates", ""],
+							"query": [
+								{
+									"key": "category",
+									"value": "cardiovascular"
+								}
+							]
+						},
+						"description": "Filter templates by category (e.g., cardiovascular, metabolic)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template Categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Categories retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/templates/categories/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "templates", "categories", ""]
+						},
+						"description": "Get list of all available template categories."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Template details retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('schema');",
+									"        pm.expect(jsonData.response).to.have.property('normal_range');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/templates/{{template_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"templates",
+								"{{template_id}}",
+								""
+							]
+						},
+						"description": "Get template details by ID including schema and normal ranges."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template by Slug",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Template details retrieved by slug\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('schema');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/templates/slug/{{template_slug}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"templates",
+								"slug",
+								"{{template_slug}}",
+								""
+							]
+						},
+						"description": "Get template details by slug (e.g., 'blood-pressure')."
+					},
+					"response": []
+				}
+			],
+			"description": "Health template endpoints - read-only for users, contains predefined health metric templates."
+		},
+		{
+			"name": "Health State - Records",
+			"item": [
+				{
+					"name": "Get All Records",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Records retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"    });",
+									"    ",
+									"    // Store first record ID",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.response && jsonData.response.length > 0) {",
+									"        pm.collectionVariables.set(\"health_record_id\", jsonData.response[0].id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "records", ""]
+						},
+						"description": "Get all health records for authenticated user.\n\n**Query Parameters:**\n- `template_id`: Filter by template ID\n- `template_slug`: Filter by template slug\n- `start_date`: Filter from date (YYYY-MM-DD)\n- `end_date`: Filter to date (YYYY-MM-DD)\n- `limit`: Limit number of results"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Records with Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Filtered records retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/?start_date=2025-01-01&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["health", "records", ""],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Example with date filter and limit."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Health Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Record created successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('id');",
+									"        pm.expect(jsonData.response).to.have.property('data');",
+									"    });",
+									"    ",
+									"    // Store created record ID",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"health_record_id\", jsonData.response.id);",
+									"    console.log(\"✅ Health record created with ID:\", jsonData.response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"template\": {{template_id}},\n    \"data\": {\n        \"systolic\": 120,\n        \"diastolic\": 80,\n        \"pulse\": 72\n    },\n    \"notes\": \"Measured in the morning after rest\",\n    \"location\": \"Home\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/health/records/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "records", ""]
+						},
+						"description": "Create a new health record.\n\n**Note:** The `data` field must match the template's schema."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Record by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Record retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('data');",
+									"        pm.expect(jsonData.response).to.have.property('template_name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/{{health_record_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"{{health_record_id}}",
+								""
+							]
+						},
+						"description": "Get a specific health record by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Health Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Record updated successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": {\n        \"systolic\": 125,\n        \"diastolic\": 82,\n        \"pulse\": 75\n    },\n    \"notes\": \"Updated measurement - evening reading\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/health/records/{{health_record_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"{{health_record_id}}",
+								""
+							]
+						},
+						"description": "Update a health record (full update)."
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Health Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Record partially updated\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"Added note: feeling good\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/health/records/{{health_record_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"{{health_record_id}}",
+								""
+							]
+						},
+						"description": "Partially update a health record (only specified fields)."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Health Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Record deleted successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"    });",
+									"    console.log(\"🗑️  Health record deleted\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/{{health_record_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"{{health_record_id}}",
+								""
+							]
+						},
+						"description": "Delete a health record."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Records by Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Template records retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/template/{{template_slug}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"template",
+								"{{template_slug}}",
+								""
+							]
+						},
+						"description": "Get all records for a specific template type.\n\n**Query Parameters:**\n- `start_date`: Filter from date\n- `end_date`: Filter to date\n- `limit`: Limit results"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Latest Records",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Latest records retrieved\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/latest/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "records", "latest", ""]
+						},
+						"description": "Get the latest record for each template type."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Records Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Summary retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.be.an('object');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/summary/",
+							"host": ["{{base_url}}"],
+							"path": ["health", "records", "summary", ""]
+						},
+						"description": "Get a summary of all health records grouped by template."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response follows SRE architecture\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    pm.test(\"Statistics retrieved successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.success).to.be.true;",
+									"        pm.expect(jsonData.response).to.have.property('total_records');",
+									"        pm.expect(jsonData.response).to.have.property('fields');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/records/stats/{{template_slug}}/?days=30",
+							"host": ["{{base_url}}"],
+							"path": [
+								"health",
+								"records",
+								"stats",
+								"{{template_slug}}",
+								""
+							],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						},
+						"description": "Get statistics for a specific template.\n\n**Query Parameters:**\n- `start_date`: Filter from date\n- `end_date`: Filter to date\n- `days`: Number of days to look back (default: 30)"
+					},
+					"response": []
+				}
+			],
+			"description": "Health record endpoints - CRUD operations for user health data with automatic token authentication."
+		},
+		{
+			"name": "Medicines",
+			"item": [
+				{
+					"name": "Get All Medicines",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Store first medicine ID if available",
+									"pm.test(\"Response contains medicines array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.response && jsonData.response.length > 0) {",
+									"        pm.collectionVariables.set(\"medicine_id\", jsonData.response[0].id);",
+									"        console.log(\"Stored medicine_id:\", jsonData.response[0].id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines/list/",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "list", ""]
+						},
+						"description": "Get all medicines for the authenticated user.\n\n**Requires:** Valid access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Medicine (via List)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Store medicine ID",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Medicine created successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        if (jsonData.success && jsonData.response.id) {",
+									"            pm.collectionVariables.set(\"medicine_id\", jsonData.response.id);",
+									"            console.log(\"Stored new medicine_id:\", jsonData.response.id);",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Aspirin\",\n    \"amount\": 2,\n    \"dosage\": 500,\n    \"days_of_week\": [1, 2, 3, 4, 5, 6, 7],\n    \"time\": [\"08:00\", \"20:00\"],\n    \"help_message\": \"Take after meals\",\n    \"start_date\": \"2025-01-01T00:00:00Z\",\n    \"end_date\": \"2025-12-31T23:59:59Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/list/",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "list", ""]
+						},
+						"description": "Create a new medicine via the list endpoint.\n\n**Request Body:**\n- `name` (required): Medicine name\n- `amount` (optional): Number of units per dose (default: 1)\n- `dosage` (optional): Dosage in mg\n- `days_of_week` (optional): Array of days [1-7] where 1=Sunday (default: all days)\n- `time` (optional): Array of times in HH:MM format (default: [\"20:00\"])\n- `help_message` (optional): Personal note\n- `start_date` (optional): Schedule start date\n- `end_date` (optional): Schedule end date"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Medicine (Alternative)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Medicine created\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        if (jsonData.success && jsonData.response.id) {",
+									"            pm.collectionVariables.set(\"medicine_id\", jsonData.response.id);",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vitamin D3\",\n    \"amount\": 1,\n    \"dosage\": 1000,\n    \"days_of_week\": [1, 3, 5],\n    \"time\": [\"09:00\"],\n    \"help_message\": \"Take with breakfast\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/add/",
+							"host": ["{{base_url}}"],
+							"path": ["medicines", "add", ""]
+						},
+						"description": "Alternative endpoint to add a new medicine."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Medicine by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Medicine details retrieved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.response).to.have.property('id');",
+									"        pm.expect(jsonData.response).to.have.property('name');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines/detail/{{medicine_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"medicines",
+								"detail",
+								"{{medicine_id}}",
+								""
+							]
+						},
+						"description": "Get details of a specific medicine by ID.\n\n**Note:** Uses the stored `medicine_id` variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medicine (via Detail)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Aspirin Updated\",\n    \"amount\": 3,\n    \"dosage\": 500,\n    \"help_message\": \"Updated: Take after meals with water\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/detail/{{medicine_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"medicines",
+								"detail",
+								"{{medicine_id}}",
+								""
+							]
+						},
+						"description": "Update medicine via detail endpoint (POST method)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Medicine (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Aspirin\",\n    \"amount\": 2,\n    \"dosage\": 500,\n    \"days_of_week\": [1, 2, 3, 4, 5],\n    \"time\": [\"08:00\", \"14:00\", \"20:00\"],\n    \"help_message\": \"Take 3 times daily after meals\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/update/{{medicine_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"medicines",
+								"update",
+								"{{medicine_id}}",
+								""
+							]
+						},
+						"description": "Full update of medicine (all fields required)."
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Medicine (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1,\n    \"help_message\": \"Reduced dosage as per doctor's advice\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medicines/update/{{medicine_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"medicines",
+								"update",
+								"{{medicine_id}}",
+								""
+							]
+						},
+						"description": "Partial update - only update specified fields."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Medicine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Medicine deleted successfully\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/medicines/delete/{{medicine_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"medicines",
+								"delete",
+								"{{medicine_id}}",
+								""
+							]
+						},
+						"description": "Delete a medicine by ID.\n\n**Returns:** 204 No Content on success."
+					},
+					"response": []
+				}
+			],
+			"description": "Medicine management endpoints - CRUD operations for user medications with scheduling and reminders."
+		},
+		{
+			"name": "Alarms",
+			"item": [
+				{
+					"name": "Get All Alarms",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"pm.test(\"Alarms are based on medicines\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.response) {",
+									"        pm.expect(jsonData.response).to.be.an('object');",
+									"        console.log(\"Alarms retrieved:\", Object.keys(jsonData.response).length);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/alarm/list/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "list", ""]
+						},
+						"description": "Get all alarms for the authenticated user.\n\n**Note:** Alarms are automatically generated from medicines.\nReturns medicine schedules formatted as alarms.\n\n**Response Format:**\n```json\n{\n  \"medicine_id\": {\n    \"name\": \"Medicine Name\",\n    \"days_of_week\": [1,2,3,4,5,6,7],\n    \"time\": [\"08:00\", \"20:00\"]\n  }\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Alarm Detail - GET (Not Allowed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Method not allowed is handled\", function () {",
+									"    pm.expect([200, 405]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/alarm/1/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "1", ""]
+						},
+						"description": "Attempt to get alarm detail.\n\n**Note:** This endpoint may not support GET method.\nAlarms are read-only and derived from medicines."
+					},
+					"response": []
+				},
+				{
+					"name": "Alarm - POST Not Allowed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"POST not allowed for alarms\", function () {",
+									"    pm.response.to.have.status(405);",
+									"});",
+									"",
+									"pm.test(\"Error message explains to use medicines\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.error) {",
+									"        pm.expect(jsonData.error.message).to.include('medicines');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Alarm\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/alarm/list/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "list", ""]
+						},
+						"description": "Attempt to create an alarm directly.\n\n**Expected:** 405 Method Not Allowed\n**Reason:** Alarms are generated from medicines, not created directly."
+					},
+					"response": []
+				},
+				{
+					"name": "Alarm - PUT Not Allowed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"PUT not allowed for alarms\", function () {",
+									"    pm.response.to.have.status(405);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/alarm/1/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "1", ""]
+						},
+						"description": "Attempt to update an alarm.\n\n**Expected:** 405 Method Not Allowed\n**Note:** Edit medicines to update alarms."
+					},
+					"response": []
+				},
+				{
+					"name": "Alarm - PATCH Not Allowed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"PATCH not allowed for alarms\", function () {",
+									"    pm.response.to.have.status(405);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/alarm/1/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "1", ""]
+						},
+						"description": "Attempt to partially update an alarm.\n\n**Expected:** 405 Method Not Allowed"
+					},
+					"response": []
+				},
+				{
+					"name": "Alarm - DELETE Not Allowed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"DELETE not allowed for alarms\", function () {",
+									"    pm.response.to.have.status(405);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/alarm/1/",
+							"host": ["{{base_url}}"],
+							"path": ["alarm", "1", ""]
+						},
+						"description": "Attempt to delete an alarm.\n\n**Expected:** 405 Method Not Allowed\n**Note:** Delete medicines to remove alarms."
+					},
+					"response": []
+				}
+			],
+			"description": "Alarm endpoints - Read-only view of medicine schedules. Alarms are automatically generated from medicines and cannot be created/updated/deleted directly."
+		},
+		{
+			"name": "Intake Records",
+			"item": [
+				{
+					"name": "Get All Intakes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Validate SRE response",
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"// Store first intake ID if available",
+									"pm.test(\"Response contains intakes array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.response && jsonData.response.length > 0) {",
+									"        pm.collectionVariables.set(\"intake_id\", jsonData.response[0].id);",
+									"        console.log(\"Stored intake_id:\", jsonData.response[0].id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/list/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "list", ""]
+						},
+						"description": "Get all intake records for the authenticated user.\n\n**Query Parameters:**\n- `date`: Filter by specific date (YYYY-MM-DD)\n- `start_date`: Filter from date (YYYY-MM-DD)\n- `end_date`: Filter to date (YYYY-MM-DD)\n- `medicine_id`: Filter by specific medicine\n- `status`: Filter by status (pending/taken/skipped/missed)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Intakes with Filters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/list/?status=pending&start_date=2025-01-01",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "list", ""],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending"
+								},
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								}
+							]
+						},
+						"description": "Example with filters for status and start date."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Intake Record",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('response');",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    pm.test(\"Intake created successfully\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        if (jsonData.success && jsonData.response.id) {",
+									"            pm.collectionVariables.set(\"intake_id\", jsonData.response.id);",
+									"            console.log(\"Stored new intake_id:\", jsonData.response.id);",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"medicine\": {{medicine_id}},\n    \"scheduled_date\": \"2025-12-06\",\n    \"scheduled_time\": \"08:00\",\n    \"status\": \"pending\",\n    \"notes\": \"Morning dose\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/list/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "list", ""]
+						},
+						"description": "Create a new intake record.\n\n**Request Body:**\n- `medicine` (required): Medicine ID\n- `scheduled_date` (required): Date in YYYY-MM-DD format\n- `scheduled_time` (required): Time in HH:MM format\n- `status` (optional): pending/taken/skipped/missed (default: pending)\n- `taken_at` (optional): Timestamp when taken (auto-set if status is 'taken')\n- `notes` (optional): Additional notes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Today's Intakes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/today/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "today", ""]
+						},
+						"description": "Get all intakes scheduled for today.\n\n**Useful for:** Daily medication dashboard."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Intakes by Medicine",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/medicine/{{medicine_id}}/?start_date=2025-01-01&end_date=2025-12-31",
+							"host": ["{{base_url}}"],
+							"path": [
+								"intake",
+								"medicine",
+								"{{medicine_id}}",
+								""
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-12-31"
+								}
+							]
+						},
+						"description": "Get all intake records for a specific medicine.\n\n**Query Parameters:**\n- `start_date`: Filter from date (optional)\n- `end_date`: Filter to date (optional)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Intake by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "{{intake_id}}", ""]
+						},
+						"description": "Get details of a specific intake record by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Intake as Taken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"pm.test(\"Intake marked as taken\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.response.status).to.eql('taken');",
+									"        pm.expect(jsonData.response.taken_at).to.exist;",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"Took with breakfast\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/mark-taken/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"intake",
+								"mark-taken",
+								"{{intake_id}}",
+								""
+							]
+						},
+						"description": "Quick action to mark an intake as taken.\n\n**Automatically sets:**\n- `status` to 'taken'\n- `taken_at` to current timestamp\n\n**Optional Body:**\n- `notes`: Additional notes"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Intake as Skipped",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"pm.test(\"Intake marked as skipped\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.response.status).to.eql('skipped');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"Feeling better, skipped dose\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/mark-skipped/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": [
+								"intake",
+								"mark-skipped",
+								"{{intake_id}}",
+								""
+							]
+						},
+						"description": "Quick action to mark an intake as skipped.\n\n**Automatically sets:**\n- `status` to 'skipped'\n- `taken_at` to null\n\n**Optional Body:**\n- `notes`: Reason for skipping"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Intake (PUT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"taken\",\n    \"notes\": \"Updated notes\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "{{intake_id}}", ""]
+						},
+						"description": "Update an intake record.\n\n**Updatable Fields:**\n- `status`: pending/taken/skipped/missed\n- `taken_at`: Timestamp (auto-set if status='taken')\n- `notes`: Additional notes"
+					},
+					"response": []
+				},
+				{
+					"name": "Partial Update Intake (PATCH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"notes\": \"Added extra note\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "{{intake_id}}", ""]
+						},
+						"description": "Partial update - only update specified fields."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Intake",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/{{intake_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "{{intake_id}}", ""]
+						},
+						"description": "Delete an intake record by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Intakes (Bulk)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"pm.test(\"Intakes generated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.response).to.have.property('created');",
+									"        pm.expect(jsonData.response).to.have.property('skipped_existing');",
+									"        console.log('Created:', jsonData.response.created);",
+									"        console.log('Skipped:', jsonData.response.skipped_existing);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_date\": \"2025-12-06\",\n    \"end_date\": \"2025-12-31\",\n    \"medicine_ids\": []\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/intake/generate/",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "generate", ""]
+						},
+						"description": "Bulk generate intake records based on medicine schedules.\n\n**Request Body:**\n- `start_date` (required): Start date in YYYY-MM-DD format\n- `end_date` (required): End date in YYYY-MM-DD format\n- `medicine_ids` (optional): Array of medicine IDs (empty = all medicines)\n\n**Automatically:**\n- Creates intakes based on medicine schedules (days_of_week, time)\n- Respects medicine start_date and end_date\n- Skips existing intakes (no duplicates)\n\n**Response:**\n- `created`: Number of intakes created\n- `skipped_existing`: Number of duplicates skipped"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Intake Statistics",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"SRE response structure is valid\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"});",
+									"",
+									"pm.test(\"Statistics include adherence rate\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success) {",
+									"        pm.expect(jsonData.response).to.have.property('adherence_rate');",
+									"        pm.expect(jsonData.response).to.have.property('total_intakes');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intake/stats/?start_date=2025-01-01&end_date=2025-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["intake", "stats", ""],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "end_date",
+									"value": "2025-12-31"
+								}
+							]
+						},
+						"description": "Get intake statistics for the user.\n\n**Query Parameters:**\n- `start_date`: Filter from date (optional)\n- `end_date`: Filter to date (optional)\n- `medicine_id`: Filter by specific medicine (optional)\n\n**Returns:**\n- `total_intakes`: Total count\n- `taken_count`: Successfully taken\n- `missed_count`: Missed intakes\n- `skipped_count`: Intentionally skipped\n- `pending_count`: Future/pending\n- `adherence_rate`: Percentage (taken / completed)\n- `on_time_count`: Taken on time\n- `late_count`: Taken late"
+					},
+					"response": []
+				}
+			],
+			"description": "Intake record endpoints - Track medicine intake events with status tracking (pending/taken/skipped/missed), bulk generation, and adherence statistics."
+		},
+		{
+			"name": "Ping & Health Check",
+			"item": [
+				{
+					"name": "Minimal Ping",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Minimal ping returns empty object\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('object');",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ping/",
+							"host": ["{{base_url}}"],
+							"path": ["ping", ""]
+						},
+						"description": "Minimal ping endpoint - returns empty JSON object.\n\n**No authentication required.**\n**Use case:** Quick server availability check."
+					},
+					"response": []
+				},
+				{
+					"name": "Ping Home",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ping returns comprehensive info\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message', 'pong');",
+									"    pm.expect(jsonData).to.have.property('timestamp');",
+									"    pm.expect(jsonData).to.have.property('request');",
+									"    pm.expect(jsonData).to.have.property('server');",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ping/home/",
+							"host": ["{{base_url}}"],
+							"path": ["ping", "home", ""]
+						},
+						"description": "Comprehensive ping endpoint with detailed server and request information.\n\n**No authentication required.**\n\n**Returns:**\n- `message`: 'pong'\n- `timestamp`: Current server time\n- `request`: HTTP request details (method, path, headers)\n- `user`: User authentication status\n- `server`: Django version, Python version, OS info\n- `headers`: All request headers\n- `get_params`: Query parameters\n- `post_data`: POST data if applicable"
+					},
+					"response": []
+				},
+				{
+					"name": "Ping Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Test ping is operational\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message', 'pong');",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ping/test/",
+							"host": ["{{base_url}}"],
+							"path": ["ping", "test", ""]
+						},
+						"description": "Test connection endpoint - same as /ping/home/.\n\n**No authentication required.**\n**Alias for:** /ping/home/"
+					},
+					"response": []
+				}
+			],
+			"description": "Ping and health check endpoints - No authentication required. Use these to verify server connectivity and get detailed server/request information."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log(\"🚀 Request:\", pm.request.method, pm.request.url.toString());",
+					"",
+					"// Check if access token exists for protected routes",
+					"var accessToken = pm.collectionVariables.get(\"access_token\");",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer' && !accessToken) {",
+					"    console.warn(\"⚠️  No access token found. This request may fail.\");",
+					"    console.warn(\"   Please login first to obtain tokens.\");",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script - runs after every request",
+					"console.log(\"📊 Response:\", pm.response.code, pm.response.status);",
+					"",
+					"// Always validate response time",
+					"pm.test(\"Response time is acceptable (< 5s)\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"// Validate content type for JSON responses",
+					"if (pm.response.headers.get(\"Content-Type\") && pm.response.headers.get(\"Content-Type\").includes(\"application/json\")) {",
+					"    pm.test(\"Content-Type is application/json\", function () {",
+					"        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_user_email",
+			"value": "test.user@mediguard.com",
+			"type": "string"
+		},
+		{
+			"key": "template_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "template_slug",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "health_record_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "medicine_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
