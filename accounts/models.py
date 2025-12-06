@@ -1,11 +1,11 @@
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
-    PermissionsMixin,
     BaseUserManager,
+    PermissionsMixin,
 )
 from django.core.validators import RegexValidator
 from django.db import models
-from django.conf import settings
 
 
 def user_profile_image_path(instance, filename):
@@ -106,3 +106,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             "address": self.address,
             "profile_image": self.get_profile_image_url(),
         }
+
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
