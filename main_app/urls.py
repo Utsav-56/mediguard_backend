@@ -18,7 +18,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 urlpatterns = [
     # Admin urls
@@ -31,13 +31,10 @@ urlpatterns = [
     path("upload/", include("image_processer.urls")),
     path("server/", include("ping.urls")),
     path("medicine/", include("medicines.urls")),
-
+    path("medicines/", include("medicines.urls")),
     path("alarm/", include("alarm.urls")),
-
     path("intake/", include("intake.urls")),
-
     path("health/", include("health_state.urls")),
-
     path("", include("ping.urls")),  # Default to ping app
 ]
 

@@ -7,7 +7,7 @@ class Intake(models.Model):
     Intake model records medicine intake events.
     Each record represents a single scheduled intake of a medicine.
     """
-    
+
     id = models.AutoField(primary_key=True, help_text="Unique ID for the intake record")
 
     user = models.ForeignKey(
@@ -36,10 +36,10 @@ class Intake(models.Model):
 
     # Status of the intake
     INTAKE_STATUS_CHOICES = [
-        ("pending", "Pending"),      # Not yet time for intake
-        ("taken", "Taken"),          # Medicine was taken
-        ("skipped", "Skipped"),      # User intentionally skipped
-        ("missed", "Missed"),        # Time passed, not marked as taken
+        ("pending", "Pending"),  # Not yet time for intake
+        ("taken", "Taken"),  # Medicine was taken
+        ("skipped", "Skipped"),  # User intentionally skipped
+        ("missed", "Missed"),  # Time passed, not marked as taken
     ]
     status = models.CharField(
         max_length=20,
